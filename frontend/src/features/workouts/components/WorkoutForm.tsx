@@ -159,16 +159,9 @@ export function WorkoutForm({
 
       <fieldset className="border-t border-[var(--line)] p-6">
         <legend className="sr-only">Exercise details</legend>
-        <div className="flex flex-wrap items-end justify-between gap-4">
-          <div>
-            <p className="text-sm font-black uppercase text-[var(--ink)]">Exercise details</p>
-            <p className="mt-1 text-sm text-[var(--muted)]">Optional. Add only the work you want to record.</p>
-          </div>
-          {workoutType !== "REST" ? (
-            <button type="button" onClick={() => setExercises((current) => [...current, createExercise()])} className="button-secondary">
-              Add exercise
-            </button>
-          ) : null}
+        <div>
+          <p className="text-sm font-black uppercase text-[var(--ink)]">Exercise details</p>
+          <p className="mt-1 text-sm text-[var(--muted)]">Optional. Add only the work you want to record.</p>
         </div>
 
         {workoutType === "REST" ? (
@@ -205,6 +198,19 @@ export function WorkoutForm({
                 ),
               )
             }
+            onCopyLastSet={() =>
+              setExercises((current) =>
+                current.map((item) => {
+                  if (item.key !== exercise.key || item.sets.length === 0) return item;
+
+                  const lastSet = item.sets[item.sets.length - 1];
+                  return {
+                    ...item,
+                    sets: [...item.sets, { ...lastSet, key: crypto.randomUUID() }],
+                  };
+                }),
+              )
+            }
             onChangeSet={(setKey, field, nextValue) =>
               setExercises((current) =>
                 current.map((item) =>
@@ -239,11 +245,18 @@ export function WorkoutForm({
         </div>
       </fieldset>
 
-      <div className="flex flex-wrap items-center justify-between gap-4 border-t border-[var(--line)] bg-[var(--paper)] px-6 py-5">
-        {formError ? <p className="text-sm font-bold text-[var(--rose)]">{formError}</p> : <span />}
-        <button type="submit" disabled={isSubmitting} className="button-primary">
-          {isSubmitting ? "Saving..." : workoutType === "REST" ? "Save rest day" : "Save workout"}
-        </button>
+      <div className="border-t border-[var(--line)] bg-[var(--paper)] px-6 py-5">
+        {formError ? <p className="mb-4 text-sm font-bold text-[var(--rose)]">{formError}</p> : null}
+        <div role="group" aria-label="Workout actions" className="flex items-center justify-between gap-4">
+          {workoutType !== "REST" ? (
+            <button type="button" onClick={() => setExercises((current) => [...current, createExercise()])} className="button-secondary">
+              Add exercise
+            </button>
+          ) : <span />}
+          <button type="submit" disabled={isSubmitting} className="button-primary">
+            {isSubmitting ? "Saving..." : workoutType === "REST" ? "Save rest day" : "Save workout"}
+          </button>
+        </div>
       </div>
     </form>
   );

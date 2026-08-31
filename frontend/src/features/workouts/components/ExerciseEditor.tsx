@@ -17,6 +17,7 @@ interface ExerciseEditorProps {
   fieldErrors: Record<string, string>;
   onExerciseNameChange: (value: string) => void;
   onAddSet: () => void;
+  onCopyLastSet: () => void;
   onChangeSet: (
     setKey: string,
     field: "weightKg" | "reps" | "rir" | "warmup",
@@ -32,6 +33,7 @@ export function ExerciseEditor({
   fieldErrors,
   onExerciseNameChange,
   onAddSet,
+  onCopyLastSet,
   onChangeSet,
   onRemoveSet,
   onRemoveExercise,
@@ -82,13 +84,19 @@ export function ExerciseEditor({
           No sets added. This exercise can still be saved without set details.
         </p>
       ) : null}
-      <button
-        type="button"
-        onClick={onAddSet}
-        className="button-secondary mt-4"
-      >
-        Add set
-      </button>
+      <div className="mt-4 flex flex-wrap gap-3">
+        <button type="button" onClick={onAddSet} className="button-secondary">
+          Add set
+        </button>
+        <button
+          type="button"
+          onClick={onCopyLastSet}
+          disabled={value.sets.length === 0}
+          className="button-secondary"
+        >
+          Copy last set
+        </button>
+      </div>
     </div>
   );
 }

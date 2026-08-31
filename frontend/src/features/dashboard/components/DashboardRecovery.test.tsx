@@ -2,6 +2,7 @@ import { render, screen } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 
 import { CoachNotes } from "@/features/dashboard/components/CoachNotes";
+import { SelectedDayPanel } from "@/features/dashboard/components/SelectedDayPanel";
 import { WorkoutLog } from "@/features/dashboard/components/WorkoutLog";
 import type { Workout } from "@/types/workout";
 
@@ -48,8 +49,20 @@ describe("dashboard recovery states", () => {
     );
 
     expect(screen.getByText("missed")).toBeInTheDocument();
-    expect(screen.getByText(/do not stack or double/i)).toBeInTheDocument();
-    expect(screen.getByText("No exercise details reported.")).toBeInTheDocument();
-    expect(screen.getAllByText("Not recorded")).toHaveLength(2);
+    expect(screen.getByText("Missed, not training debt.")).toBeInTheDocument();
+    expect(screen.getByText("0 exercises · 0 sets logged")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /Lower/i })).toHaveAttribute("href", "/workouts/1");
+  });
+
+  it("uses workout list cards for the selected day", () => {
+    render(
+      <MemoryRouter>
+        <SelectedDayPanel selectedDate="2026-08-31" workouts={[missedWorkout]} />
+      </MemoryRouter>,
+    );
+
+    expect(screen.getByRole("heading", { name: "Monday, Aug 31, 2026" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /Lower/i })).toHaveAttribute("href", "/workouts/1");
+    expect(screen.getByRole("link", { name: "View daily log" })).toHaveAttribute("href", "/daily-log/2026-08-31");
   });
 });
