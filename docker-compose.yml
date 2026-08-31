@@ -1,4 +1,13 @@
 services:
+  frontend:
+    build:
+      context: ./frontend
+    container_name: body-dashboard-frontend
+    depends_on:
+      - backend
+    ports:
+      - "127.0.0.1:5173:80"
+
   backend:
     build:
       context: ./backend
@@ -11,13 +20,16 @@ services:
       DB_USERNAME: body_dashboard
       DB_PASSWORD: body_dashboard
       SERVER_PORT: 8080
+
       AI_INTERPRETATION_PROVIDER: ${AI_INTERPRETATION_PROVIDER:-none}
       AI_INTERPRETATION_MODEL: ${AI_INTERPRETATION_MODEL:-}
       AI_INTERPRETATION_BASE_URL: ${AI_INTERPRETATION_BASE_URL:-https://api.openai.com/v1}
       AI_INTERPRETATION_API_KEY: ${AI_INTERPRETATION_API_KEY:-}
       AI_INTERPRETATION_TIMEOUT: ${AI_INTERPRETATION_TIMEOUT:-30s}
-    ports:
-      - "127.0.0.1:8080:8080"
+
+    expose:
+      - "8080"
+
   postgres:
     image: postgres:16-alpine
     container_name: body-dashboard-postgres
@@ -25,12 +37,19 @@ services:
       POSTGRES_DB: body_dashboard
       POSTGRES_USER: body_dashboard
       POSTGRES_PASSWORD: body_dashboard
+
     ports:
       - "127.0.0.1:5433:5432"
+
     volumes:
       - postgres-data:/var/lib/postgresql/data
+
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U body_dashboard -d body_dashboard"]
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U body_dashboard -d body_dashboard"
+        ]
       interval: 10s
       timeout: 5s
       retries: 5

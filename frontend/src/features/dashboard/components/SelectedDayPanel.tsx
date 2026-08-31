@@ -16,20 +16,19 @@ export function SelectedDayPanel({ selectedDate, workouts }: SelectedDayPanelPro
       <p className="eyebrow">
         Selected Day
       </p>
+            <div className="flex items-center justify-between gap-4">
       <h2 className="font-serif-display mt-2 text-3xl font-medium text-[var(--ink)]">
         {formatFullDateString(selectedDate)}
       </h2>
-      <div className="mt-6 flex items-center justify-between gap-4">
-        <p className="text-sm text-[var(--muted)]">
-          Workout records only. Daily check-ins remain separate.
-        </p>
-        <Link
-          to={`/daily-log/${selectedDate}`}
-          className="button-secondary shrink-0"
-        >
+      <Link
+        to={`/daily-log/${selectedDate}`}
+        className="button-secondary shrink-0"
+      >
           View daily log
-        </Link>
+      </Link>
       </div>
+
+ 
       <div className="mt-6 space-y-4">
         {workouts.length === 0 ? (
           <EmptyState

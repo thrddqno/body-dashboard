@@ -56,7 +56,7 @@ export function WeeklyCalendar({
               className={`relative min-h-44 rounded-[8px] border border-t-4 p-4 text-left transition duration-[180ms] hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(17,24,39,0.08)] ${stateBorder} ${
                 isToday
                   ? "border-[var(--ink)] bg-[var(--ink)] text-white"
-                  : "bg-white text-[var(--ink)]"
+                  : "bg-white border-[var(--ink)]/20 text-[var(--ink)]"
               }`}
             >
               {selected ? (
@@ -72,7 +72,7 @@ export function WeeklyCalendar({
               </span>
               <div className="mt-5 space-y-2">
                 <span className={`text-[10px] font-black uppercase ${isToday ? "text-[#cbd5e1]" : "text-[var(--muted)]"}`}>
-                  {isToday ? "Today · " : ""}{workouts.length} workout record{workouts.length === 1 ? "" : "s"}
+                  {workouts.length} workout record{workouts.length === 1 ? "" : "s"}
                 </span>
                 {primaryWorkout ? (
                   <div>

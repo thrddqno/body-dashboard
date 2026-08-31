@@ -26,7 +26,7 @@ export function WorkoutList({ workouts }: WorkoutListProps) {
   );
 
   return (
-    <div className="border-t border-[var(--ink)]">
+    <div className="border-t border-[var(--ink)]/20">
       {newestFirst.map((workout) => {
         const date = parseLocalDate(workout.date);
         const exerciseCount = workout.exercises.length;
@@ -35,10 +35,10 @@ export function WorkoutList({ workouts }: WorkoutListProps) {
 
         return (
           <Link
-            key={workout.id}
-            to={`/workouts/${workout.id}`}
-            className="group grid grid-cols-[64px_minmax(0,1fr)_auto] items-center gap-4 border-b border-[var(--line)] px-2 py-5 transition-colors duration-[180ms] hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[var(--green)] sm:grid-cols-[76px_minmax(0,1fr)_auto] sm:px-3"
-          >
+              key={workout.id}
+              to={`/workouts/${workout.id}`}
+              className="group grid grid-cols-[64px_minmax(0,1fr)_auto] items-center gap-4 border-b border-[var(--line)] px-2 py-5 transition-colors duration-[180ms] last:border-b-0 hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[var(--green)] sm:grid-cols-[76px_minmax(0,1fr)_auto] sm:px-3"
+            >
             <div className="border-r border-[var(--line)] pr-4 text-center">
               <p className="text-[9px] font-black uppercase text-[var(--muted)]">
                 {date.toLocaleDateString(undefined, { weekday: "short" })}
