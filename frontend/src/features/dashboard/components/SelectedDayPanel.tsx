@@ -1,9 +1,11 @@
 import { Link } from "react-router-dom";
 
-import { EmptyState } from "@/components/EmptyState";
+import { PlannedWorkoutView } from "@/features/workouts/components/PlannedWorkoutView";
+import { RestDayView } from "@/features/workouts/components/RestDayView";
 import { WorkoutList } from "@/features/workouts/components/WorkoutList";
 import type { Workout } from "@/types/workout";
 import { formatFullDateString } from "@/utils/formatters";
+import { getPlannedWorkout } from "@/utils/workoutPlanResolver";
 
 interface SelectedDayPanelProps {
   selectedDate: string;
@@ -11,6 +13,9 @@ interface SelectedDayPanelProps {
 }
 
 export function SelectedDayPanel({ selectedDate, workouts }: SelectedDayPanelProps) {
+  const hasWorkouts = workouts.length > 0;
+  const plan = getPlannedWorkout(selectedDate);
+
   return (
     <section className="panel p-6">
       <p className="eyebrow">
@@ -28,23 +33,14 @@ export function SelectedDayPanel({ selectedDate, workouts }: SelectedDayPanelPro
       </Link>
       </div>
 
- 
       <div className="mt-6 space-y-4">
-        {workouts.length === 0 ? (
-          <EmptyState
-            title="No workout logged"
-            description="No completed, planned, or missed workout was reported for this date. This does not imply a rest or recovery day."
-            action={
-              <Link
-                to="/workouts"
-                className="button-primary"
-              >
-                Log a workout
-              </Link>
-            }
-          />
-        ) : null}
-        {workouts.length > 0 ? <WorkoutList workouts={workouts} /> : null}
+        {hasWorkouts ? (
+          <WorkoutList workouts={workouts} />
+        ) : plan.type === "rest" ? (
+          <RestDayView date={selectedDate} plan={plan} />
+        ) : (
+          <PlannedWorkoutView date={selectedDate} plan={plan} />
+        )}
       </div>
     </section>
   );
