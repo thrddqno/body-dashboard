@@ -16,6 +16,7 @@ services:
       postgres:
         condition: service_healthy
     environment:
+      TZ: ${APP_TIMEZONE:-Asia/Manila}
       DB_URL: jdbc:postgresql://postgres:5432/body_dashboard
       DB_USERNAME: body_dashboard
       DB_PASSWORD: body_dashboard
