@@ -9,8 +9,8 @@ interface DashboardHeaderProps {
 
 export function DashboardHeader({ today, periodLabel }: DashboardHeaderProps) {
   return (
-    <header className="flex min-h-[300px] flex-col justify-center border-b border-[var(--line)] py-14 md:min-h-[360px] md:py-16">
-      <div className="flex flex-col gap-8 md:flex-row md:items-end md:justify-between">
+    <header className="flex min-h-[300px] flex-col justify-center border-b border-[var(--line)] py-7 md:min-h-[360px] md:py-7">
+      <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
         <div>
           <p className="eyebrow">
             Current week · {periodLabel}

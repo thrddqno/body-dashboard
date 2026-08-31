@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -55,5 +56,12 @@ public class WorkoutController {
 			@PathVariable Long id,
 			@Valid @RequestBody WorkoutStatusUpdateRequest request) {
 		return workoutService.updateStatus(id, request.status());
+	}
+
+	@PutMapping("/{id}")
+	public WorkoutResponse updateWorkout(
+			@PathVariable Long id,
+			@Valid @RequestBody WorkoutRequest request) {
+		return workoutService.updateWorkout(id, request);
 	}
 }

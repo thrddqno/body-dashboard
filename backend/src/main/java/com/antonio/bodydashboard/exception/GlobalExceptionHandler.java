@@ -113,4 +113,13 @@ public class GlobalExceptionHandler {
 						HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase(),
 						"Persistence operation failed"));
 	}
+
+	@ExceptionHandler(IllegalStateException.class)
+	public ResponseEntity<ApiError> handleIllegalState(IllegalStateException exception) {
+		return ResponseEntity.status(HttpStatus.CONFLICT)
+				.body(ApiError.of(
+						HttpStatus.CONFLICT.value(),
+						HttpStatus.CONFLICT.getReasonPhrase(),
+						exception.getMessage()));
+	}
 }

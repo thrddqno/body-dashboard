@@ -30,6 +30,10 @@ interface WorkoutFormProps {
   fieldErrors: Record<string, string>;
   formError?: string;
   onSubmit: (request: WorkoutRequest) => Promise<boolean>;
+  initialWorkoutType?: string;
+  initialStatus?: WorkoutStatus;
+  initialNotes?: string;
+  initialExercises?: ExerciseFormValue[];
 }
 
 const workoutTypes = ["PUSH", "PULL", "LEGS", "REST", "UPPER", "LOWER"] as const;
@@ -67,18 +71,38 @@ function createExercise(): ExerciseFormValue {
   };
 }
 
+function toFormExercises(exercises?: ExerciseFormValue[]): ExerciseFormValue[] {
+  if (!exercises) return [];
+  return exercises.map((exercise) => ({
+    ...exercise,
+    key: crypto.randomUUID(),
+    sets: exercise.sets.map((set) => ({
+      ...set,
+      key: crypto.randomUUID(),
+    })),
+  }));
+}
+
 export function WorkoutForm({
   initialDate,
   isSubmitting,
   fieldErrors,
   formError,
   onSubmit,
+  initialWorkoutType,
+  initialStatus,
+  initialNotes,
+  initialExercises,
 }: WorkoutFormProps) {
+  const isEditing = initialWorkoutType != null;
+
   const [date, setDate] = useState(initialDate);
-  const [workoutType, setWorkoutType] = useState<ScheduledWorkoutType>(() => scheduledWorkoutType(initialDate));
-  const [status, setStatus] = useState<WorkoutStatus>("PLANNED");
-  const [notes, setNotes] = useState("");
-  const [exercises, setExercises] = useState<ExerciseFormValue[]>([]);
+  const [workoutType, setWorkoutType] = useState<ScheduledWorkoutType>(
+    () => (initialWorkoutType as ScheduledWorkoutType) ?? scheduledWorkoutType(initialDate),
+  );
+  const [status, setStatus] = useState<WorkoutStatus>(initialStatus ?? "PLANNED");
+  const [notes, setNotes] = useState(initialNotes ?? "");
+  const [exercises, setExercises] = useState<ExerciseFormValue[]>(() => toFormExercises(initialExercises));
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -101,7 +125,7 @@ export function WorkoutForm({
       })),
     });
 
-    if (saved) {
+    if (saved && !isEditing) {
       setWorkoutType(scheduledWorkoutType(date));
       setStatus("PLANNED");
       setNotes("");
@@ -112,10 +136,14 @@ export function WorkoutForm({
   return (
     <form className="panel overflow-hidden" onSubmit={handleSubmit}>
       <div className="p-6 pb-2">
-        <p className="eyebrow">New record</p>
-        <h2 className="font-serif-display mt-2 text-3xl font-medium text-[var(--ink)]">Create workout</h2>
+        <p className="eyebrow">{isEditing ? "Edit record" : "New record"}</p>
+        <h2 className="font-serif-display mt-2 text-3xl font-medium text-[var(--ink)]">
+          {isEditing ? "Edit workout" : "Create workout"}
+        </h2>
         <p className="mt-2 max-w-xl text-sm leading-6 text-[var(--muted)]">
-          Log the day first, then add exercise details only when they apply. REST days never require exercises.
+          {isEditing
+            ? "Update workout details. Exercise content will be fully replaced."
+            : "Log the day first, then add exercise details only when they apply. REST days never require exercises."}
         </p>
       </div>
 
@@ -126,7 +154,7 @@ export function WorkoutForm({
           <input type="date" value={date} onChange={(event) => {
             const nextDate = event.target.value;
             setDate(nextDate);
-            if (nextDate) setWorkoutType(scheduledWorkoutType(nextDate));
+            if (nextDate && !isEditing) setWorkoutType(scheduledWorkoutType(nextDate));
           }} className="form-control mt-2 w-full font-normal" required />
           <FieldError message={fieldErrors.date} />
         </label>
@@ -254,7 +282,7 @@ export function WorkoutForm({
             </button>
           ) : <span />}
           <button type="submit" disabled={isSubmitting} className="button-primary">
-            {isSubmitting ? "Saving..." : workoutType === "REST" ? "Save rest day" : "Save workout"}
+            {isSubmitting ? "Saving..." : isEditing ? "Update workout" : workoutType === "REST" ? "Save rest day" : "Save workout"}
           </button>
         </div>
       </div>

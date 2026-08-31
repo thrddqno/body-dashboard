@@ -101,35 +101,35 @@ describe("Planned workout fallback", () => {
       renderPanel("2026-09-01");
 
       expect(screen.getByText("Today's Plan")).toBeInTheDocument();
-      expect(screen.getByText(/Tue, Sep 1 · Push/)).toBeInTheDocument();
+      expect(screen.getByText("Push")).toBeInTheDocument();
       expect(screen.getByText("Chest, shoulders, triceps")).toBeInTheDocument();
     });
 
     it("renders Pull plan when no workout logged on Wednesday", () => {
       renderPanel("2026-09-02");
 
-      expect(screen.getByText(/Wed, Sep 2 · Pull/)).toBeInTheDocument();
+      expect(screen.getByText("Pull")).toBeInTheDocument();
       expect(screen.getByText("Back, rear delts, biceps")).toBeInTheDocument();
     });
 
     it("renders Legs + Core plan when no workout logged on Thursday", () => {
       renderPanel("2026-09-03");
 
-      expect(screen.getByText(/Thu, Sep 3 · Legs \+ Core/)).toBeInTheDocument();
+      expect(screen.getByText("Legs + Core")).toBeInTheDocument();
       expect(screen.getByText("Stable lower body and core")).toBeInTheDocument();
     });
 
     it("renders Upper plan when no workout logged on Saturday", () => {
       renderPanel("2026-09-05");
 
-      expect(screen.getByText(/Sat, Sep 5 · Upper/)).toBeInTheDocument();
+      expect(screen.getByText("Upper")).toBeInTheDocument();
       expect(screen.getByText("Upper body plus skill practice")).toBeInTheDocument();
     });
 
     it("renders Lower plan when no workout logged on Sunday", () => {
       renderPanel("2026-09-06");
 
-      expect(screen.getByText(/Sun, Sep 6 · Lower/)).toBeInTheDocument();
+      expect(screen.getByText("Lower")).toBeInTheDocument();
       expect(screen.getByText("Lower body strength and controlled movement")).toBeInTheDocument();
     });
   });

@@ -29,3 +29,13 @@ export function updateWorkoutStatus(
     body: toJsonBody({ status }),
   });
 }
+
+export function updateWorkout(
+  id: string,
+  request: WorkoutRequest,
+): Promise<Workout> {
+  return requestJson<Workout>(`/workouts/${id}`, {
+    method: "PUT",
+    body: toJsonBody(request),
+  });
+}

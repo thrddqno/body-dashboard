@@ -5,6 +5,7 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -312,6 +313,63 @@ class WorkoutControllerTests {
 				.andExpect(jsonPath("$.exercises[0].sets[0].warmup").value(false));
 
 		assertThat(workoutRepository.count()).isEqualTo(1);
+	}
+
+	@Test
+	void updatesPlannedWorkoutDetails() throws Exception {
+		Long workoutId = createWorkout(workoutRequest(
+				LocalDate.of(2026, 8, 30), "UPPER", WorkoutStatus.PLANNED,
+				List.of(exerciseRequest("Bench Press", 1, List.of(setRequest(1, "60.00", 8, 1, false))))));
+
+		WorkoutRequest update = new WorkoutRequest(
+				LocalDate.of(2026, 9, 1), "PUSH", WorkoutStatus.PLANNED, "Updated notes",
+				List.of(
+						exerciseRequest("Incline Press", 1, List.of(setRequest(1, "50.00", 10, 2, true))),
+						exerciseRequest("Dumbbell Fly", 2, List.of(setRequest(1, "15.00", 12, 3, false)))));
+
+		mockMvc.perform(put("/api/workouts/{id}", workoutId)
+					.contentType(MediaType.APPLICATION_JSON)
+					.content(objectMapper.writeValueAsString(update)))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.id").value(workoutId))
+				.andExpect(jsonPath("$.date").value("2026-09-01"))
+				.andExpect(jsonPath("$.workoutType").value("PUSH"))
+				.andExpect(jsonPath("$.status").value("PLANNED"))
+				.andExpect(jsonPath("$.notes").value("Updated notes"))
+				.andExpect(jsonPath("$.exercises", hasSize(2)))
+				.andExpect(jsonPath("$.exercises[0].exerciseName").value("Incline Press"))
+				.andExpect(jsonPath("$.exercises[0].sets", hasSize(1)))
+				.andExpect(jsonPath("$.exercises[0].sets[0].warmup").value(true))
+				.andExpect(jsonPath("$.exercises[1].exerciseName").value("Dumbbell Fly"));
+
+		assertThat(workoutRepository.count()).isEqualTo(1);
+	}
+
+	@Test
+	void rejectsUpdateOfCompletedWorkout() throws Exception {
+		Long workoutId = createWorkout(workoutRequest(
+				LocalDate.of(2026, 8, 30), "UPPER", WorkoutStatus.COMPLETED, List.of()));
+
+		WorkoutRequest update = workoutRequest(
+				LocalDate.of(2026, 9, 1), "PUSH", WorkoutStatus.PLANNED, List.of());
+
+		mockMvc.perform(put("/api/workouts/{id}", workoutId)
+					.contentType(MediaType.APPLICATION_JSON)
+					.content(objectMapper.writeValueAsString(update)))
+				.andExpect(status().isConflict())
+				.andExpect(jsonPath("$.message").value("Cannot update a workout that is already completed"));
+	}
+
+	@Test
+	void returnsNotFoundWhenUpdatingMissingWorkout() throws Exception {
+		WorkoutRequest update = workoutRequest(
+				LocalDate.of(2026, 9, 1), "PUSH", WorkoutStatus.PLANNED, List.of());
+
+		mockMvc.perform(put("/api/workouts/{id}", 999L)
+					.contentType(MediaType.APPLICATION_JSON)
+					.content(objectMapper.writeValueAsString(update)))
+				.andExpect(status().isNotFound())
+				.andExpect(jsonPath("$.message").value("Workout not found for id: 999"));
 	}
 
 	private Long createWorkout(WorkoutRequest request) throws Exception {

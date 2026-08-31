@@ -85,4 +85,8 @@ public class WorkoutExercise {
 			sets.forEach(this::addSet);
 		}
 	}
+
+	public void removeAllSets() {
+		sets.clear();
+	}
 }

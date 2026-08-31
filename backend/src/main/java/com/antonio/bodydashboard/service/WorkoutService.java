@@ -69,6 +69,29 @@ public class WorkoutService {
 		return toResponse(workoutRepository.saveAndFlush(workout));
 	}
 
+	@Transactional
+	public WorkoutResponse updateWorkout(Long id, WorkoutRequest request) {
+		Workout workout = workoutRepository.findById(id)
+				.orElseThrow(() -> new WorkoutNotFoundException(id));
+
+		if (workout.getStatus() == WorkoutStatus.COMPLETED) {
+			throw new IllegalStateException("Cannot update a workout that is already completed");
+		}
+
+		workout.setDate(request.date());
+		workout.setWorkoutType(request.workoutType());
+		workout.setNotes(request.notes());
+
+		workout.getExercises().clear();
+
+		for (WorkoutExerciseRequest exerciseRequest : nullSafe(request.exercises())) {
+			WorkoutExercise exercise = toExercise(exerciseRequest);
+			workout.addExercise(exercise);
+		}
+
+		return toResponse(workoutRepository.save(workout));
+	}
+
 	private WorkoutExercise toExercise(WorkoutExerciseRequest request) {
 		WorkoutExercise exercise = new WorkoutExercise();
 		exercise.setExerciseName(request.exerciseName());

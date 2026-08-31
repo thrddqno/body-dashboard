@@ -18,7 +18,8 @@ export function WeeklyCalendar({
   selectedDate,
   onSelectDate,
 }: WeeklyCalendarProps) {
-  const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone || "Local time";
+  const timezone =
+    Intl.DateTimeFormat().resolvedOptions().timeZone || "Local time";
 
   return (
     <section className="pt-11">
@@ -28,7 +29,9 @@ export function WeeklyCalendar({
           <h2 className="section-title mt-2">Training week</h2>
         </div>
         <p className="mobile-optional text-right text-xs leading-5 text-[var(--muted)]">
-          {timezone}<br />Select a day to inspect records.
+          {timezone}
+          <br />
+          Select a day to inspect records.
         </p>
       </div>
       <div className="calendar-grid mt-6 grid grid-cols-7 gap-3">
@@ -53,38 +56,80 @@ export function WeeklyCalendar({
               type="button"
               onClick={() => onSelectDate(date)}
               aria-pressed={selected}
-              className={`relative min-h-44 rounded-[8px] border border-t-4 p-4 text-left transition duration-[180ms] hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(17,24,39,0.08)] ${stateBorder} ${
+              className={`relative flex min-h-44 flex-col justify-between rounded-[8px] border border-t-4 p-4 text-left transition duration-[180ms] hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(17,24,39,0.08)] ${stateBorder} ${
                 isToday
                   ? "border-[var(--ink)] bg-[var(--ink)] text-white"
                   : "bg-white border-[var(--ink)]/20 text-[var(--ink)]"
               }`}
             >
-              {selected ? (
-                <span className={`absolute right-2 top-2 rounded-full px-2 py-1 text-[9px] font-black uppercase tracking-wide ${isToday ? "bg-[var(--lime)] text-[var(--ink)]" : "bg-[var(--ink)] text-white"}`}>
-                  Selected
+              <div className="flex flex-col">
+                {selected ? (
+                  <div className="flex w-full items-center justify-between gap-4">
+                    <span
+                      className={`text-[10px] font-black uppercase ${
+                        isToday ? "text-[var(--lime)]" : "text-[var(--muted)]"
+                      }`}
+                    >
+                      {day.toLocaleDateString(undefined, { weekday: "short" })}
+                    </span>
+
+                    <span
+                      className={`rounded-full px-2 py-1 text-[9px] font-black uppercase tracking-wide ${
+                        isToday
+                          ? "bg-[var(--lime)] text-[var(--ink)]"
+                          : "bg-[var(--ink)] text-white"
+                      }`}
+                    >
+                      Selected
+                    </span>
+                  </div>
+                ) : (
+                  <span
+                    className={`text-[10px] font-black uppercase ${
+                      isToday ? "text-[var(--lime)]" : "text-[var(--muted)]"
+                    }`}
+                  >
+                    {day.toLocaleDateString(undefined, { weekday: "short" })}
+                  </span>
+                )}
+
+                <span className="font-serif-display mt-3 block text-[26px] leading-none">
+                  {formatCompactDateString(date)}
                 </span>
-              ) : null}
-              <span className={`text-[10px] font-black uppercase ${isToday ? "text-[var(--lime)]" : "text-[var(--muted)]"}`}>
-                {day.toLocaleDateString(undefined, { weekday: "short" })}
-              </span>
-              <span className="font-serif-display mt-3 block text-[26px] leading-none">
-                {formatCompactDateString(date)}
-              </span>
+              </div>
+
               <div className="mt-5 space-y-2">
-                <span className={`text-[10px] font-black uppercase ${isToday ? "text-[#cbd5e1]" : "text-[var(--muted)]"}`}>
-                  {workouts.length} workout record{workouts.length === 1 ? "" : "s"}
+                <span
+                  className={`text-[10px] font-black uppercase ${
+                    isToday ? "text-[#cbd5e1]" : "text-[var(--muted)]"
+                  }`}
+                >
+                  {workouts.length} workout record
+                  {workouts.length === 1 ? "" : "s"}
                 </span>
+
                 {primaryWorkout ? (
                   <div>
-                    <p className={`truncate text-sm font-bold ${isToday ? "text-white" : "text-[var(--ink)]"}`}>
+                    <p
+                      className={`truncate text-sm font-bold ${
+                        isToday ? "text-white" : "text-[var(--ink)]"
+                      }`}
+                    >
                       {primaryWorkout.workoutType}
                     </p>
+
                     <div className="mt-2">
                       <StatusBadge status={primaryWorkout.status} />
                     </div>
                   </div>
                 ) : (
-                  <p className={`text-xs ${isToday ? "text-[#cbd5e1]" : "text-[var(--muted)]"}`}>No workout reported</p>
+                  <p
+                    className={`text-xs ${
+                      isToday ? "text-[#cbd5e1]" : "text-[var(--muted)]"
+                    }`}
+                  >
+                    No workout reported
+                  </p>
                 )}
               </div>
             </button>
