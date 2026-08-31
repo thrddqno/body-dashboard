@@ -1,0 +1,17 @@
+.env
+.env.*
+!.env.example
+
+frontend/node_modules/
+frontend/dist/
+backend/target/
+
+# Local tools and generated reports
+.idea/
+.vscode/
+*.log
+*.pem
+*.key
+frontend/coverage/
+frontend/.vite/
+frontend/.eslintcache

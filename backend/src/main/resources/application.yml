@@ -1,0 +1,29 @@
+spring:
+  application:
+    name: body-dashboard-backend
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5433/body_dashboard}
+    username: ${DB_USERNAME:body_dashboard}
+    password: ${DB_PASSWORD:body_dashboard}
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+    properties:
+      hibernate:
+        format_sql: true
+
+server:
+  port: ${SERVER_PORT:8080}
+
+body-dashboard:
+  ai:
+    interpretation:
+      provider: ${AI_INTERPRETATION_PROVIDER:none}
+      model: ${AI_INTERPRETATION_MODEL:}
+      base-url: ${AI_INTERPRETATION_BASE_URL:https://api.openai.com/v1}
+      api-key: ${AI_INTERPRETATION_API_KEY:}
+      timeout: ${AI_INTERPRETATION_TIMEOUT:30s}

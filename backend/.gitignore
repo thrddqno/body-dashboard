@@ -1,0 +1,32 @@
+HELP.md
+
+# Maven
+/target/
+.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
+
+# Logs and local runtime files
+*.log
+*.pid
+.env
+.env.*
+!.env.example
+
+# IDEs
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+.idea/
+*.iws
+*.iml
+*.ipr
+.vscode/
+
+# OS files
+.DS_Store
+Thumbs.db
