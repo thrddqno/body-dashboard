@@ -129,7 +129,7 @@ public class OpenAiCompatibleAiInterpretationProvider implements AiInterpretatio
 								"content", analysisSystemInstruction()),
 						Map.of(
 								"role", "user",
-								"content", "Interpret this structured fitness analysis context. Return only one JSON object with exactly these fields: summary (Markdown string), interpretation (array of Markdown strings), strengths (array of Markdown strings), concerns (array of Markdown strings), recommendations (array of Markdown strings). The summary must be a concise 2-4 sentence coaching directive that leads with the most important supported action for the coming week. Include specific training, recovery, or logging guidance only when supported by the provided facts, and clearly qualify the advice when data is sparse. Use empty arrays when evidence does not support a section. Do not include known facts or data gaps because the application supplies them deterministically. Treat all numeric values as already calculated facts. Do not calculate averages, workout volume, weight changes, adherence, or PRs. Do not invent missing data. Do not wrap the JSON in Markdown fences.\n\n" + contextJson)));
+								"content", "Interpret this structured fitness analysis context. Return only one JSON object with exactly these fields: summary (Markdown string), interpretation (array of Markdown strings), strengths (array of Markdown strings), concerns (array of Markdown strings), recommendations (array of Markdown strings). The summary must be a concise 2-4 sentence coaching directive that leads with the most important supported action for the coming week. The 'readiness' verdict and its 'factors' are pre-computed deterministic facts; do not recompute or override them. Your 'summary' should speak to what the data suggests about readiness going into next week, and your 'recommendations' should tell the user what to change or keep doing this week (e.g. training intensity, recovery/sleep focus, logging) and, if evidence supports it, what may have gone wrong and how to correct it. Include specific training, recovery, or logging guidance only when supported by the provided facts, and clearly qualify the advice when data is sparse. Use empty arrays when evidence does not support a section. Do not include known facts or data gaps because the application supplies them deterministically. Treat all numeric values as already calculated facts. Do not calculate averages, workout volume, weight changes, adherence, PRs, or readiness. Do not invent missing data. Do not wrap the JSON in Markdown fences.\n\n" + contextJson)));
 	}
 
 	private String dashboardSystemInstruction() {
@@ -141,9 +141,10 @@ public class OpenAiCompatibleAiInterpretationProvider implements AiInterpretatio
 
 	private String analysisSystemInstruction() {
 		return "You are an AI coaching interpretation layer for weekly fitness analysis. "
-				+ "Use only provided deterministic analytics, recent logs, and data gaps. "
+				+ "Use only provided deterministic analytics, the readiness decision, recent logs, and data gaps. "
+				+ "Treat the readiness verdict as a pre-computed fact and do not override it. "
 				+ "Write the summary as direct, practical coaching guidance rather than a generic recap. "
-				+ "Do not calculate averages, workout volume, weight changes, adherence, or personal records. "
+				+ "Do not calculate averages, workout volume, weight changes, adherence, personal records, or readiness. "
 				+ "Do not invent body measurements, sleep, steps, workouts, missed workouts, calories, or trends. "
 				+ "Return only valid JSON matching the requested structure. "
 				+ "If data is missing or sparse, say the analysis is limited rather than guessing.";

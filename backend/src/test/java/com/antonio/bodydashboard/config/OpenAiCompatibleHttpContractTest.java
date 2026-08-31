@@ -261,6 +261,7 @@ class OpenAiCompatibleHttpContractTest {
 				new AnalysisContext.BodyFacts(new java.math.BigDecimal("80.00"), end, null, null),
 				new AnalysisContext.RecoveryFacts(start, end, new java.math.BigDecimal("7.3"), 8000, 5),
 				new AnalysisContext.TrainingFacts(start, end, 2, 1, new java.math.BigDecimal("66.67"), List.of(), List.of()),
+				new AnalysisContext.ReadinessFacts("MAINTAIN", true, List.of("Workout adherence was 66.7%.")),
 				List.of(),
 				List.of(),
 				List.of("No body fat data."));

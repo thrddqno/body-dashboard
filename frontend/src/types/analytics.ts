@@ -16,4 +16,9 @@ export interface WeeklyAnalytics {
     missedWorkouts: number;
     adherencePercentage: number | null;
   };
+  decision: {
+    verdict: "PROGRESS" | "MAINTAIN" | "DELOAD" | "INSUFFICIENT_DATA";
+    sufficientData: boolean;
+    factors: string[];
+  };
 }
