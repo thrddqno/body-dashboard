@@ -41,6 +41,7 @@ class AiCoachServiceTest {
 				new AnalysisContext.BodyFacts(null, null, null, null),
 				new AnalysisContext.RecoveryFacts(LocalDate.of(2026, 8, 24), LocalDate.of(2026, 8, 30), null, null, 0),
 				new AnalysisContext.TrainingFacts(LocalDate.of(2026, 8, 24), LocalDate.of(2026, 8, 30), 0, 0, null, List.of(), List.of()),
+				new AnalysisContext.ReadinessFacts("INSUFFICIENT_DATA", false, List.of("No data available.")),
 				List.of(),
 				List.of(),
 				List.of("No data available."));

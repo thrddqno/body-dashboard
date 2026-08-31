@@ -121,7 +121,12 @@ export function DashboardPage() {
           <CoachNotes analysis={latestAnalysis} isLoading={isAnalysisLoading} error={analysisError} />
           <WorkoutLog workouts={workouts} />
         </div>
-        <DashboardSidePanels dashboard={dashboard} analytics={analytics} />
+        <DashboardSidePanels
+          dashboard={dashboard}
+          analytics={analytics}
+          latestAnalysis={latestAnalysis}
+          hasAnalysis={!isAnalysisLoading && latestAnalysis != null}
+        />
       </div>
     </main>
   );

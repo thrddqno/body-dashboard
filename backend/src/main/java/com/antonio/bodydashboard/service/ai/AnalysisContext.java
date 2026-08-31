@@ -14,6 +14,7 @@ public record AnalysisContext(
 		BodyFacts body,
 		RecoveryFacts recovery,
 		TrainingFacts training,
+		ReadinessFacts readiness,
 		List<RecentDailyLog> recentDailyLogs,
 		List<RecentWorkout> recentWorkouts,
 		List<String> dataGaps) {
@@ -71,6 +72,16 @@ public record AnalysisContext(
 			Integer repsAtHighestWeight,
 			BigDecimal highestSetVolume,
 			BigDecimal highestWorkoutExerciseVolume) {
+	}
+
+	public record ReadinessFacts(
+			String verdict,
+			boolean sufficientData,
+			List<String> factors) {
+
+		public ReadinessFacts {
+			factors = factors == null ? List.of() : List.copyOf(factors);
+		}
 	}
 
 	public record RecentDailyLog(

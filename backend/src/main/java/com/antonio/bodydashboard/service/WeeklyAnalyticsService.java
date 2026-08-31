@@ -13,6 +13,8 @@ import org.springframework.transaction.annotation.Transactional;
 import com.antonio.bodydashboard.dto.WeeklyAnalyticsResponse;
 import com.antonio.bodydashboard.service.analytics.BodyAnalyticsService;
 import com.antonio.bodydashboard.service.analytics.BodyPeriodAnalyticsSummary;
+import com.antonio.bodydashboard.service.analytics.ReadinessDecision;
+import com.antonio.bodydashboard.service.analytics.ReadinessDecisionService;
 import com.antonio.bodydashboard.service.analytics.RecoveryAnalyticsService;
 import com.antonio.bodydashboard.service.analytics.RecoveryAnalyticsSummary;
 import com.antonio.bodydashboard.service.analytics.WorkoutAnalyticsService;
@@ -24,16 +26,19 @@ public class WeeklyAnalyticsService {
 	private final BodyAnalyticsService bodyAnalyticsService;
 	private final RecoveryAnalyticsService recoveryAnalyticsService;
 	private final WorkoutAnalyticsService workoutAnalyticsService;
+	private final ReadinessDecisionService readinessDecisionService;
 	private final Clock clock;
 
 	public WeeklyAnalyticsService(
 			BodyAnalyticsService bodyAnalyticsService,
 			RecoveryAnalyticsService recoveryAnalyticsService,
 			WorkoutAnalyticsService workoutAnalyticsService,
+			ReadinessDecisionService readinessDecisionService,
 			Clock clock) {
 		this.bodyAnalyticsService = bodyAnalyticsService;
 		this.recoveryAnalyticsService = recoveryAnalyticsService;
 		this.workoutAnalyticsService = workoutAnalyticsService;
+		this.readinessDecisionService = readinessDecisionService;
 		this.clock = clock;
 	}
 
@@ -54,7 +59,22 @@ public class WeeklyAnalyticsService {
 				new WeeklyAnalyticsResponse.Period(start, end),
 				buildBody(body),
 				buildRecovery(recovery),
-				buildTraining(training));
+				buildTraining(training),
+				buildDecision(body, recovery, training));
+	}
+
+	private WeeklyAnalyticsResponse.Decision buildDecision(
+			BodyPeriodAnalyticsSummary body,
+			RecoveryAnalyticsSummary recovery,
+			WorkoutAnalyticsSummary training) {
+		ReadinessDecision decision = readinessDecisionService.decide(new ReadinessDecision.Inputs(
+				body.weightChangeKg(),
+				training.adherencePercentage(),
+				recovery.averageSleepMinutes().map(minutes -> minutes.divide(BigDecimal.valueOf(60), 1, RoundingMode.HALF_UP))));
+		return new WeeklyAnalyticsResponse.Decision(
+				decision.verdict().name(),
+				decision.sufficientData(),
+				decision.factors());
 	}
 
 	private WeeklyAnalyticsResponse.Body buildBody(BodyPeriodAnalyticsSummary body) {

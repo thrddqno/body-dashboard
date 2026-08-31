@@ -20,6 +20,8 @@ import com.antonio.bodydashboard.repository.DailyLogRepository;
 import com.antonio.bodydashboard.repository.WorkoutRepository;
 import com.antonio.bodydashboard.service.analytics.BodyAnalyticsService;
 import com.antonio.bodydashboard.service.analytics.BodyAnalyticsSummary;
+import com.antonio.bodydashboard.service.analytics.ReadinessDecision;
+import com.antonio.bodydashboard.service.analytics.ReadinessDecisionService;
 import com.antonio.bodydashboard.service.analytics.RecoveryAnalyticsService;
 import com.antonio.bodydashboard.service.analytics.RecoveryAnalyticsSummary;
 import com.antonio.bodydashboard.service.analytics.WorkoutAnalyticsService;
@@ -35,6 +37,7 @@ public class AnalysisContextBuilder {
 	private final BodyAnalyticsService bodyAnalyticsService;
 	private final RecoveryAnalyticsService recoveryAnalyticsService;
 	private final WorkoutAnalyticsService workoutAnalyticsService;
+	private final ReadinessDecisionService readinessDecisionService;
 	private final DailyLogRepository dailyLogRepository;
 	private final WorkoutRepository workoutRepository;
 
@@ -43,12 +46,14 @@ public class AnalysisContextBuilder {
 			BodyAnalyticsService bodyAnalyticsService,
 			RecoveryAnalyticsService recoveryAnalyticsService,
 			WorkoutAnalyticsService workoutAnalyticsService,
+			ReadinessDecisionService readinessDecisionService,
 			DailyLogRepository dailyLogRepository,
 			WorkoutRepository workoutRepository) {
 		this.clock = clock;
 		this.bodyAnalyticsService = bodyAnalyticsService;
 		this.recoveryAnalyticsService = recoveryAnalyticsService;
 		this.workoutAnalyticsService = workoutAnalyticsService;
+		this.readinessDecisionService = readinessDecisionService;
 		this.dailyLogRepository = dailyLogRepository;
 		this.workoutRepository = workoutRepository;
 	}
@@ -78,9 +83,24 @@ public class AnalysisContextBuilder {
 				toBodyFacts(body),
 				toRecoveryFacts(recovery),
 				toTrainingFacts(training),
+				toReadinessFacts(body, recovery, training),
 				recentDailyLogs,
 				recentWorkouts,
 				dataGaps(body, recovery, training, recentDailyLogs, recentWorkouts));
+	}
+
+	private AnalysisContext.ReadinessFacts toReadinessFacts(
+			BodyAnalyticsSummary body,
+			RecoveryAnalyticsSummary recovery,
+			WorkoutAnalyticsSummary training) {
+		ReadinessDecision decision = readinessDecisionService.decide(new ReadinessDecision.Inputs(
+				body.sevenDayWeightChangeKg(),
+				training.adherencePercentage(),
+				recovery.averageSleepMinutes().map(this::minutesToHours)));
+		return new AnalysisContext.ReadinessFacts(
+				decision.verdict().name(),
+				decision.sufficientData(),
+				decision.factors());
 	}
 
 	private AnalysisContext.BodyFacts toBodyFacts(BodyAnalyticsSummary body) {
