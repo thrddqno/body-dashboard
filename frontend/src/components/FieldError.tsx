@@ -1,11 +1,12 @@
 interface FieldErrorProps {
+  id?: string;
   message?: string;
 }
 
-export function FieldError({ message }: FieldErrorProps) {
+export function FieldError({ id, message }: FieldErrorProps) {
   if (!message) {
     return null;
   }
 
-  return <p className="mt-1 text-sm text-rose-300">{message}</p>;
+  return <p id={id} className="form-error">{message}</p>;
 }

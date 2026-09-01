@@ -7,20 +7,11 @@ import { ErrorState } from "@/components/ErrorState";
 import { LoadingState } from "@/components/LoadingState";
 import { PageHeader } from "@/components/PageHeader";
 import { DailyLogForm } from "@/features/dailyLogs/components/DailyLogForm";
-import type { DailyLogRequest, EnergyLevel } from "@/types/dailyLog";
+import type { DailyLogFormValues } from "@/features/dailyLogs/components/DailyLogForm";
+import type { DailyLogRequest } from "@/types/dailyLog";
 import { formatDateInputValue, isValidLocalDateString } from "@/utils/dates";
-import { parseOptionalInteger } from "@/utils/forms";
+import { parseOptionalInteger, trimmedStringOrNull } from "@/utils/forms";
 import { formatFullDateString, sleepHoursInputToMinutes, sleepMinutesToHoursInput } from "@/utils/formatters";
-
-interface DailyLogFormValues {
-  sleepHours: string;
-  steps: string;
-  energy: EnergyLevel | "";
-  painNotes: string;
-  recoveryNotes: string;
-  estimatedCalories: string;
-  estimatedProteinGrams: string;
-}
 
 const emptyValues: DailyLogFormValues = {
   sleepHours: "",
@@ -37,8 +28,8 @@ function mapToRequest(values: DailyLogFormValues): DailyLogRequest {
     sleepMinutes: sleepHoursInputToMinutes(values.sleepHours),
     steps: parseOptionalInteger(values.steps),
     energy: values.energy || null,
-    painNotes: values.painNotes.trim() ? values.painNotes : null,
-    recoveryNotes: values.recoveryNotes.trim() ? values.recoveryNotes : null,
+    painNotes: trimmedStringOrNull(values.painNotes),
+    recoveryNotes: trimmedStringOrNull(values.recoveryNotes),
     estimatedCalories: parseOptionalInteger(values.estimatedCalories),
     estimatedProteinGrams: parseOptionalInteger(values.estimatedProteinGrams),
   };
@@ -56,6 +47,7 @@ export function DailyLogPage() {
   const [error, setError] = useState<string>();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formError, setFormError] = useState<string>();
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [saveMessage, setSaveMessage] = useState<string>();
 
   useEffect(() => {
@@ -68,6 +60,8 @@ export function DailyLogPage() {
     async function loadDailyLog() {
       setIsLoading(true);
       setError(undefined);
+      setFormError(undefined);
+      setFieldErrors({});
       setSaveMessage(undefined);
 
       if (!isSelectedDateValid) {
@@ -111,6 +105,8 @@ export function DailyLogPage() {
     const submittedDate = selectedDate;
     setIsSubmitting(true);
     setFormError(undefined);
+    setFieldErrors({});
+    setSaveMessage(undefined);
 
     try {
       const saved = await saveDailyLog(selectedDate, mapToRequest(values));
@@ -126,7 +122,12 @@ export function DailyLogPage() {
       });
       setSaveMessage("Daily log saved.");
     } catch (submitError) {
-      setFormError(submitError instanceof Error ? submitError.message : "Unable to save daily log.");
+      if (submitError instanceof ApiError) {
+        setFormError(submitError.message);
+        setFieldErrors(submitError.fieldErrors);
+      } else {
+        setFormError(submitError instanceof Error ? submitError.message : "Unable to save daily log.");
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -144,6 +145,7 @@ export function DailyLogPage() {
             value={isSelectedDateValid ? selectedDate : ""}
             onChange={(event) => navigate(`/daily-log/${event.target.value}`)}
             disabled={isSubmitting}
+            aria-label="Daily log date"
             className="form-control min-w-44 text-sm"
           />
         }
@@ -156,6 +158,7 @@ export function DailyLogPage() {
           <DailyLogForm
             values={values}
             isSubmitting={isSubmitting}
+            fieldErrors={fieldErrors}
             formError={formError}
             onChange={setValues}
             onSubmit={handleSubmit}

@@ -91,4 +91,23 @@ describe("DailyLogPage", () => {
       });
     });
   });
+
+  it("displays backend field errors beside the matching input", async () => {
+    getDailyLogMock.mockRejectedValue(new ApiError("Daily log not found", 404));
+    saveDailyLogMock.mockRejectedValue(new ApiError(
+      "Validation failed",
+      400,
+      { sleepMinutes: "Sleep must be between 0 and 24 hours." },
+    ));
+
+    renderPage();
+    await screen.findByText("Daily recovery and nutrition log");
+
+    fireEvent.change(screen.getByLabelText("Sleep (hours)"), { target: { value: "8" } });
+    fireEvent.click(screen.getByRole("button", { name: "Save daily log" }));
+
+    const error = await screen.findByText("Sleep must be between 0 and 24 hours.");
+    expect(screen.getByLabelText("Sleep (hours)")).toHaveAttribute("aria-describedby", error.id);
+    expect(screen.getByRole("alert")).toHaveTextContent("Validation failed");
+  });
 });

@@ -33,6 +33,10 @@ export function BodyMetricForm({
     bodyFatPercentage: "",
   });
 
+  const update = <K extends keyof BodyMetricFormValues>(field: K, value: BodyMetricFormValues[K]) => {
+    setValues((current) => ({ ...current, [field]: value }));
+  };
+
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
@@ -54,63 +58,83 @@ export function BodyMetricForm({
   }
 
   return (
-    <form className="panel p-6" onSubmit={handleSubmit}>
+    <form className="panel p-6" onSubmit={handleSubmit} aria-busy={isSubmitting}>
       <h2 className="font-serif-display text-2xl font-medium text-[var(--ink)]">Add measurement</h2>
-      <p className="mt-2 text-sm text-slate-400">
+      <p className="form-help mt-2">
         Record factual measurements only. Existing records cannot currently be edited.
       </p>
-      <div className="mt-6 grid gap-4 md:grid-cols-2">
-        <label className="text-sm text-slate-300">
-          <span>Date</span>
-          <input
-            type="date"
-            value={values.date}
-            onChange={(event) => setValues({ ...values, date: event.target.value })}
-            className="mt-2 w-full rounded-2xl border border-slate-700 bg-slate-950/50 px-4 py-3 text-white"
-            required
-          />
-          <FieldError message={fieldErrors.date} />
-        </label>
-        <label className="text-sm text-slate-300">
-          <span>Weight (kg)</span>
-          <input
-            type="number"
-            step="0.01"
-            min="0.01"
-            value={values.weightKg}
-            onChange={(event) => setValues({ ...values, weightKg: event.target.value })}
-            className="mt-2 w-full rounded-2xl border border-slate-700 bg-slate-950/50 px-4 py-3 text-white"
-            required
-          />
-          <FieldError message={fieldErrors.weightKg} />
-        </label>
-        <label className="text-sm text-slate-300">
-          <span>Waist (cm)</span>
-          <input
-            type="number"
-            step="0.01"
-            min="0.01"
-            value={values.waistCm}
-            onChange={(event) => setValues({ ...values, waistCm: event.target.value })}
-            className="mt-2 w-full rounded-2xl border border-slate-700 bg-slate-950/50 px-4 py-3 text-white"
-          />
-          <FieldError message={fieldErrors.waistCm} />
-        </label>
-        <label className="text-sm text-slate-300">
-          <span>Body fat (%)</span>
-          <input
-            type="number"
-            step="0.01"
-            min="0.01"
-            max="100"
-            value={values.bodyFatPercentage}
-            onChange={(event) => setValues({ ...values, bodyFatPercentage: event.target.value })}
-            className="mt-2 w-full rounded-2xl border border-slate-700 bg-slate-950/50 px-4 py-3 text-white"
-          />
-          <FieldError message={fieldErrors.bodyFatPercentage} />
-        </label>
-      </div>
-      {formError ? <p className="mt-4 text-sm text-rose-300">{formError}</p> : null}
+      <fieldset disabled={isSubmitting} className="mt-6 grid gap-4 md:grid-cols-2">
+        <div>
+          <label htmlFor="body-metric-date" className="form-label">
+            <span className="form-label-text">Date</span>
+            <input
+              id="body-metric-date"
+              type="date"
+              value={values.date}
+              onChange={(event) => update("date", event.target.value)}
+              className="form-control mt-2 font-normal"
+              aria-invalid={Boolean(fieldErrors.date)}
+              aria-describedby={fieldErrors.date ? "body-metric-date-error" : undefined}
+              required
+            />
+          </label>
+          <FieldError id="body-metric-date-error" message={fieldErrors.date} />
+        </div>
+        <div>
+          <label htmlFor="body-metric-weight" className="form-label">
+            <span className="form-label-text">Weight (kg)</span>
+            <input
+              id="body-metric-weight"
+              type="number"
+              step="0.01"
+              min="0.01"
+              value={values.weightKg}
+              onChange={(event) => update("weightKg", event.target.value)}
+              className="form-control mt-2 font-normal"
+              aria-invalid={Boolean(fieldErrors.weightKg)}
+              aria-describedby={fieldErrors.weightKg ? "body-metric-weight-error" : undefined}
+              required
+            />
+          </label>
+          <FieldError id="body-metric-weight-error" message={fieldErrors.weightKg} />
+        </div>
+        <div>
+          <label htmlFor="body-metric-waist" className="form-label">
+            <span className="form-label-text">Waist (cm)</span>
+            <input
+              id="body-metric-waist"
+              type="number"
+              step="0.01"
+              min="0.01"
+              value={values.waistCm}
+              onChange={(event) => update("waistCm", event.target.value)}
+              className="form-control mt-2 font-normal"
+              aria-invalid={Boolean(fieldErrors.waistCm)}
+              aria-describedby={fieldErrors.waistCm ? "body-metric-waist-error" : undefined}
+            />
+          </label>
+          <FieldError id="body-metric-waist-error" message={fieldErrors.waistCm} />
+        </div>
+        <div>
+          <label htmlFor="body-metric-body-fat" className="form-label">
+            <span className="form-label-text">Body fat (%)</span>
+            <input
+              id="body-metric-body-fat"
+              type="number"
+              step="0.01"
+              min="0.01"
+              max="100"
+              value={values.bodyFatPercentage}
+              onChange={(event) => update("bodyFatPercentage", event.target.value)}
+              className="form-control mt-2 font-normal"
+              aria-invalid={Boolean(fieldErrors.bodyFatPercentage)}
+              aria-describedby={fieldErrors.bodyFatPercentage ? "body-metric-body-fat-error" : undefined}
+            />
+          </label>
+          <FieldError id="body-metric-body-fat-error" message={fieldErrors.bodyFatPercentage} />
+        </div>
+      </fieldset>
+      {formError ? <p role="alert" className="form-error mt-4">{formError}</p> : null}
       <button
         type="submit"
         disabled={isSubmitting}

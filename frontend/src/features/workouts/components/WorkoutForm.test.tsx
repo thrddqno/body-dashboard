@@ -120,4 +120,41 @@ describe("WorkoutForm", () => {
     fireEvent.click(screen.getByRole("button", { name: "Remove set 1" }));
     expect(screen.getByRole("button", { name: "Copy last set" })).toBeDisabled();
   });
+
+  it("associates nested backend errors with their controls", () => {
+    render(
+      <WorkoutForm
+        initialDate="2026-09-01"
+        isSubmitting={false}
+        fieldErrors={{ "exercises[0].sets[0].weightKg": "Weight must not be negative." }}
+        initialExercises={[{
+          key: "exercise-1",
+          exerciseName: "Bench press",
+          sets: [{ key: "set-1", weightKg: "-1", reps: "5", rir: "", warmup: false }],
+        }]}
+        onSubmit={vi.fn()}
+      />,
+    );
+
+    const input = screen.getByLabelText("Weight (kg)");
+    const error = screen.getByText("Weight must not be negative.");
+
+    expect(input).toHaveAttribute("aria-invalid", "true");
+    expect(input).toHaveAttribute("aria-describedby", error.id);
+  });
+
+  it("disables fields and mutation actions while submitting", () => {
+    render(
+      <WorkoutForm
+        initialDate="2026-09-01"
+        isSubmitting
+        fieldErrors={{}}
+        onSubmit={vi.fn()}
+      />,
+    );
+
+    expect(screen.getByLabelText("Date")).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Add exercise" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Saving..." })).toBeDisabled();
+  });
 });

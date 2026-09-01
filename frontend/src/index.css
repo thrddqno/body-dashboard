@@ -143,6 +143,45 @@ button {
   padding: 0.75rem 0.875rem;
 }
 
+.form-label {
+  display: block;
+  color: var(--ink);
+  font-size: 0.875rem;
+}
+
+.form-label-text {
+  font-weight: 700;
+}
+
+.form-help {
+  color: var(--muted);
+  font-size: 0.8125rem;
+  line-height: 1.5;
+}
+
+.form-error {
+  margin-top: 0.25rem;
+  color: var(--rose);
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.form-control[aria-invalid="true"] {
+  border-color: var(--rose);
+}
+
+.form-control:disabled,
+.form-checkbox:disabled {
+  cursor: not-allowed;
+  opacity: 0.65;
+}
+
+.form-checkbox {
+  width: 1rem;
+  height: 1rem;
+  accent-color: var(--green);
+}
+
 .form-control::placeholder {
   color: #8b94a1;
 }

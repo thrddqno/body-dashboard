@@ -1,12 +1,6 @@
+import { FieldError } from "@/components/FieldError";
 import { SetEditor } from "@/features/workouts/components/SetEditor";
-
-interface SetFormValue {
-  key: string;
-  weightKg: string;
-  reps: string;
-  rir: string;
-  warmup: boolean;
-}
+import type { SetFormValue } from "@/features/workouts/workoutFormTypes";
 
 interface ExerciseEditorProps {
   exerciseIndex: number;
@@ -38,24 +32,29 @@ export function ExerciseEditor({
   onRemoveSet,
   onRemoveExercise,
 }: ExerciseEditorProps) {
+  const inputId = `workout-exercise-${exerciseIndex}-name`;
+  const errorId = `${inputId}-error`;
+  const error = fieldErrors[`exercises[${exerciseIndex}].exerciseName`];
+
   return (
     <div className="rounded-[8px] border border-[var(--line)] bg-white p-5">
       <div className="flex items-start justify-between gap-4">
-        <label className="flex-1 text-sm text-[var(--ink)]">
-          <span className="font-bold">Exercise name</span>
-          <input
-            type="text"
-            value={value.exerciseName}
-            onChange={(event) => onExerciseNameChange(event.target.value)}
-            className="form-control mt-2 w-full font-normal"
-            required
-          />
-          {fieldErrors[`exercises[${exerciseIndex}].exerciseName`] ? (
-            <p className="mt-1 text-sm text-[var(--rose)]">
-              {fieldErrors[`exercises[${exerciseIndex}].exerciseName`]}
-            </p>
-          ) : null}
-        </label>
+        <div className="flex-1">
+          <label htmlFor={inputId} className="form-label">
+            <span className="form-label-text">Exercise name</span>
+            <input
+              id={inputId}
+              type="text"
+              value={value.exerciseName}
+              onChange={(event) => onExerciseNameChange(event.target.value)}
+              className="form-control mt-2 font-normal"
+              aria-invalid={Boolean(error)}
+              aria-describedby={error ? errorId : undefined}
+              required
+            />
+          </label>
+          <FieldError id={errorId} message={error} />
+        </div>
         <button
           type="button"
           onClick={onRemoveExercise}

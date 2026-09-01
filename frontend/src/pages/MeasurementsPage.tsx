@@ -21,19 +21,6 @@ export function MeasurementsPage() {
   const [formError, setFormError] = useState<string>();
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
-  async function loadMetrics() {
-    setIsLoading(true);
-    setError(undefined);
-
-    try {
-      setMetrics(await listBodyMetrics());
-    } catch (loadError) {
-      setError(loadError instanceof Error ? loadError.message : "Unable to load measurements.");
-    } finally {
-      setIsLoading(false);
-    }
-  }
-
   useEffect(() => {
     async function loadInitialMetrics() {
       try {
@@ -54,8 +41,10 @@ export function MeasurementsPage() {
     setFieldErrors({});
 
     try {
-      await createBodyMetric(request);
-      await loadMetrics();
+      const createdMetric = await createBodyMetric(request);
+      setMetrics((current) =>
+        [createdMetric, ...current].sort((left, right) => right.date.localeCompare(left.date)),
+      );
       return true;
     } catch (submitError) {
       if (submitError instanceof ApiError) {

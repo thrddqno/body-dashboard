@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 
+import { ApiError } from "@/api/httpClient";
 import { ErrorState } from "@/components/ErrorState";
 import { LoadingState } from "@/components/LoadingState";
 import { WorkoutDetail } from "@/features/workouts/components/WorkoutDetail";
@@ -82,10 +83,9 @@ export function WorkoutDetailPage() {
       setIsEditing(false);
       return true;
     } catch (updateError) {
-      if (updateError instanceof Error && "fieldErrors" in updateError) {
-        const apiError = updateError as Error & { fieldErrors: Record<string, string> };
-        setFormError(apiError.message);
-        setFieldErrors(apiError.fieldErrors);
+      if (updateError instanceof ApiError) {
+        setFormError(updateError.message);
+        setFieldErrors(updateError.fieldErrors);
         return false;
       }
 
