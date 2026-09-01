@@ -16,3 +16,9 @@ export interface PlannedWorkout {
   guardrails: string[];
   optional?: string[];
 }
+
+export interface TrainingPlan extends PlannedWorkout {
+  date: string;
+  dayOfWeek: string;
+  workoutType: "PUSH" | "PULL" | "LEGS" | "REST" | "UPPER" | "LOWER";
+}

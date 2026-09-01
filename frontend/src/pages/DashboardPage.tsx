@@ -5,6 +5,7 @@ import { getLatestWeeklyAiAnalysis } from "@/api/aiAnalysisApi";
 import { getDashboard } from "@/api/dashboardApi";
 import { ApiError } from "@/api/httpClient";
 import { listWorkouts } from "@/api/workoutsApi";
+import { getTrainingPlan } from "@/api/trainingPlansApi";
 import { ErrorState } from "@/components/ErrorState";
 import { LoadingState } from "@/components/LoadingState";
 import { CoachNotes } from "@/features/dashboard/components/CoachNotes";
@@ -18,6 +19,7 @@ import type { WeeklyAnalytics } from "@/types/analytics";
 import type { WeeklyAiAnalysis } from "@/types/aiAnalysis";
 import type { DashboardResponse } from "@/types/dashboard";
 import type { Workout } from "@/types/workout";
+import type { TrainingPlan } from "@/types/plannedWorkout";
 import { getWeekDates } from "@/utils/dates";
 import { formatFullDateString } from "@/utils/formatters";
 
@@ -31,6 +33,8 @@ export function DashboardPage() {
   const [latestAnalysis, setLatestAnalysis] = useState<WeeklyAiAnalysis | null>(null);
   const [isAnalysisLoading, setIsAnalysisLoading] = useState(true);
   const [analysisError, setAnalysisError] = useState<string>();
+  const [trainingPlan, setTrainingPlan] = useState<TrainingPlan | null>(null);
+  const [trainingPlanError, setTrainingPlanError] = useState<{ date: string; message: string }>();
 
   useEffect(() => {
     const controller = new AbortController();
@@ -67,6 +71,27 @@ export function DashboardPage() {
   }, []);
 
   useEffect(() => {
+    if (!selectedDate) return;
+
+    const controller = new AbortController();
+    const plannedWorkout = workouts
+      .filter((workout) => workout.date === selectedDate && workout.status === "PLANNED")
+      .sort((left, right) => right.createdAt.localeCompare(left.createdAt))[0];
+
+    getTrainingPlan(selectedDate, controller.signal, plannedWorkout?.workoutType)
+      .then((plan) => {
+        setTrainingPlan(plan);
+        setTrainingPlanError(undefined);
+      })
+      .catch((loadError: unknown) => {
+        if (loadError instanceof Error && loadError.name === "AbortError") return;
+        setTrainingPlanError({ date: selectedDate, message: "Unable to load the training plan." });
+      });
+
+    return () => controller.abort();
+  }, [selectedDate, workouts]);
+
+  useEffect(() => {
     const controller = new AbortController();
 
     async function loadLatestAnalysis() {
@@ -100,6 +125,8 @@ export function DashboardPage() {
     return accumulator;
   }, {});
   const selectedDayWorkouts = workoutsByDate[selectedDate] ?? [];
+  const selectedTrainingPlan = trainingPlan?.date === selectedDate ? trainingPlan : null;
+  const selectedTrainingPlanError = trainingPlanError?.date === selectedDate ? trainingPlanError.message : undefined;
   const periodLabel = `${formatFullDateString(analytics.period.start)} - ${formatFullDateString(analytics.period.end)}`;
 
   return (
@@ -114,7 +141,12 @@ export function DashboardPage() {
         onSelectDate={setSelectedDate}
       />
       <div className="mt-6">
-        <SelectedDayPanel selectedDate={selectedDate} workouts={selectedDayWorkouts} />
+        <SelectedDayPanel
+          selectedDate={selectedDate}
+          workouts={selectedDayWorkouts}
+          plan={selectedTrainingPlan}
+          planError={selectedTrainingPlanError}
+        />
       </div>
       <div className="dashboard-body grid grid-cols-[minmax(0,1.65fr)_minmax(260px,0.75fr)] gap-[26px] pb-9 pt-[88px]">
         <div className="min-w-0">

@@ -21,6 +21,8 @@ services:
       DB_USERNAME: body_dashboard
       DB_PASSWORD: body_dashboard
       SERVER_PORT: 8080
+      SERVER_ADDRESS: 0.0.0.0
+      MCP_ENABLED: ${MCP_ENABLED:-false}
 
       AI_INTERPRETATION_PROVIDER: ${AI_INTERPRETATION_PROVIDER:-none}
       AI_INTERPRETATION_MODEL: ${AI_INTERPRETATION_MODEL:-}
@@ -28,8 +30,8 @@ services:
       AI_INTERPRETATION_API_KEY: ${AI_INTERPRETATION_API_KEY:-}
       AI_INTERPRETATION_TIMEOUT: ${AI_INTERPRETATION_TIMEOUT:-30s}
 
-    expose:
-      - "8080"
+    ports:
+      - "127.0.0.1:8080:8080"
 
   postgres:
     image: postgres:16-alpine

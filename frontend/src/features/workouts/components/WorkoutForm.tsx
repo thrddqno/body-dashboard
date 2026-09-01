@@ -4,7 +4,6 @@ import { FieldError } from "@/components/FieldError";
 import { ExerciseEditor } from "@/features/workouts/components/ExerciseEditor";
 import type { ExerciseFormValue, SetFormValue } from "@/features/workouts/workoutFormTypes";
 import type { WorkoutRequest, WorkoutStatus } from "@/types/workout";
-import { parseLocalDate } from "@/utils/dates";
 import {
   parseOptionalInteger,
   parseRequiredDecimal,
@@ -22,24 +21,13 @@ interface WorkoutFormProps {
   initialStatus?: WorkoutStatus;
   initialNotes?: string;
   initialExercises?: ExerciseFormValue[];
+  scheduledWorkoutType?: ScheduledWorkoutType;
+  isScheduleLoading?: boolean;
+  onDateChange?: (date: string) => void;
 }
 
 const workoutTypes = ["PUSH", "PULL", "LEGS", "REST", "UPPER", "LOWER"] as const;
 type ScheduledWorkoutType = (typeof workoutTypes)[number];
-
-const workoutTypeByDay: Record<number, ScheduledWorkoutType> = {
-  0: "LOWER",
-  1: "REST",
-  2: "PUSH",
-  3: "PULL",
-  4: "LEGS",
-  5: "REST",
-  6: "UPPER",
-};
-
-function scheduledWorkoutType(date: string): ScheduledWorkoutType {
-  return workoutTypeByDay[parseLocalDate(date).getDay()];
-}
 
 function createSet(): SetFormValue {
   return {
@@ -81,13 +69,18 @@ export function WorkoutForm({
   initialStatus,
   initialNotes,
   initialExercises,
+  scheduledWorkoutType,
+  isScheduleLoading = false,
+  onDateChange,
 }: WorkoutFormProps) {
   const isEditing = initialWorkoutType != null;
 
   const [date, setDate] = useState(initialDate);
-  const [workoutType, setWorkoutType] = useState<ScheduledWorkoutType>(
-    () => (initialWorkoutType as ScheduledWorkoutType) ?? scheduledWorkoutType(initialDate),
-  );
+  const [workoutTypeOverride, setWorkoutTypeOverride] = useState<ScheduledWorkoutType | null>(null);
+  const workoutType = workoutTypeOverride
+    ?? (initialWorkoutType as ScheduledWorkoutType | undefined)
+    ?? scheduledWorkoutType
+    ?? "PUSH";
   const [status, setStatus] = useState<WorkoutStatus>(initialStatus ?? "PLANNED");
   const [notes, setNotes] = useState(initialNotes ?? "");
   const [exercises, setExercises] = useState<ExerciseFormValue[]>(() => toFormExercises(initialExercises));
@@ -114,7 +107,7 @@ export function WorkoutForm({
     });
 
     if (saved && !isEditing) {
-      setWorkoutType(scheduledWorkoutType(date));
+      setWorkoutTypeOverride(null);
       setStatus("PLANNED");
       setNotes("");
       setExercises([]);
@@ -135,7 +128,7 @@ export function WorkoutForm({
         </p>
       </div>
 
-      <fieldset disabled={isSubmitting} className="p-4 sm:p-6">
+      <fieldset disabled={isSubmitting || isScheduleLoading} className="p-4 sm:p-6">
         <div className="grid gap-4 md:grid-cols-2">
           <div>
             <label htmlFor="workout-date" className="form-label">
@@ -143,7 +136,10 @@ export function WorkoutForm({
               <input id="workout-date" type="date" value={date} onChange={(event) => {
                 const nextDate = event.target.value;
                 setDate(nextDate);
-                if (nextDate && !isEditing) setWorkoutType(scheduledWorkoutType(nextDate));
+                if (nextDate && !isEditing) {
+                  setWorkoutTypeOverride(null);
+                  onDateChange?.(nextDate);
+                }
               }} className="form-control mt-2 font-normal" aria-invalid={Boolean(fieldErrors.date)} aria-describedby={fieldErrors.date ? "workout-date-error" : undefined} required />
             </label>
             <FieldError id="workout-date-error" message={fieldErrors.date} />
@@ -153,7 +149,7 @@ export function WorkoutForm({
               <span className="form-label-text">Workout type</span>
               <select id="workout-type" value={workoutType} onChange={(event) => {
                 const nextType = event.target.value as ScheduledWorkoutType;
-                setWorkoutType(nextType);
+                setWorkoutTypeOverride(nextType);
                 if (nextType === "REST") setExercises([]);
               }} className="form-control mt-2 font-normal" aria-invalid={Boolean(fieldErrors.workoutType)} aria-describedby={fieldErrors.workoutType ? "workout-type-error" : undefined}>
                 {workoutTypes.map((type) => <option key={type} value={type}>{type}</option>)}
@@ -182,7 +178,7 @@ export function WorkoutForm({
         </div>
       </fieldset>
 
-      <fieldset disabled={isSubmitting} className="border-t border-[var(--line)] p-4 sm:p-6">
+      <fieldset disabled={isSubmitting || isScheduleLoading} className="border-t border-[var(--line)] p-4 sm:p-6">
         <legend className="sr-only">Exercise details</legend>
         <div>
           <p className="text-sm font-black uppercase text-[var(--ink)]">Exercise details</p>
@@ -275,11 +271,11 @@ export function WorkoutForm({
         {formError ? <p role="alert" className="form-error mb-4 mt-0">{formError}</p> : null}
         <div role="group" aria-label="Workout actions" className="flex flex-col items-stretch justify-between gap-3 sm:flex-row sm:items-center sm:gap-4">
           {workoutType !== "REST" ? (
-            <button type="button" disabled={isSubmitting} onClick={() => setExercises((current) => [...current, createExercise()])} className="button-secondary w-full sm:w-auto">
+            <button type="button" disabled={isSubmitting || isScheduleLoading} onClick={() => setExercises((current) => [...current, createExercise()])} className="button-secondary w-full sm:w-auto">
               Add exercise
             </button>
           ) : null}
-          <button type="submit" disabled={isSubmitting} className="button-primary w-full sm:ml-auto sm:w-auto">
+          <button type="submit" disabled={isSubmitting || isScheduleLoading} className="button-primary w-full sm:ml-auto sm:w-auto">
             {isSubmitting ? "Saving..." : isEditing ? "Update workout" : workoutType === "REST" ? "Save rest day" : "Save workout"}
           </button>
         </div>

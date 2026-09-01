@@ -1,6 +1,27 @@
 spring:
   application:
     name: body-dashboard-backend
+  ai:
+    mcp:
+      server:
+        enabled: ${MCP_ENABLED:false}
+        protocol: STREAMABLE
+        type: SYNC
+        name: body-dashboard
+        version: 0.0.1
+        instructions: Read-only access to Body Dashboard workouts, training plans, analytics, and stored analysis.
+        capabilities:
+          tool: true
+          resource: false
+          prompt: false
+          completion: false
+        resource-change-notification: false
+        prompt-change-notification: false
+        tool-change-notification: false
+        streamable-http:
+          mcp-endpoint: /mcp
+        annotation-scanner:
+          enabled: ${MCP_ENABLED:false}
   datasource:
     url: ${DB_URL:jdbc:postgresql://localhost:5433/body_dashboard}
     username: ${DB_USERNAME:body_dashboard}
@@ -17,6 +38,7 @@ spring:
         format_sql: true
 
 server:
+  address: ${SERVER_ADDRESS:127.0.0.1}
   port: ${SERVER_PORT:8080}
 
 body-dashboard:

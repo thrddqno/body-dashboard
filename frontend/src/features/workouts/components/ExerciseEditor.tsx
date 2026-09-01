@@ -41,15 +41,13 @@ export function ExerciseEditor({
 
   return (
     <section className="rounded-[8px] border border-[var(--line)] bg-white p-4 sm:p-5">
-      <div className="flex items-start justify-between gap-4">
+      <div className="flex items-end justify-between gap-3">
         <div className="min-w-0 flex-1">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-[var(--muted)]">
-            Exercise {exerciseIndex + 1}
-          </p>
-
-          <div className="mt-3 border-t border-[var(--line)] pt-3">
             <label htmlFor={inputId} className="form-label">
-              <span className="form-label-text">Exercise name</span>
+              <span className="text-[11px] font-semibold uppercase tracking-[0.08em] text-[var(--muted)]">
+                Exercise name
+              </span>
+
               <input
                 id={inputId}
                 type="text"
@@ -62,8 +60,8 @@ export function ExerciseEditor({
                 required
               />
             </label>
+
             <FieldError id={errorId} message={error} />
-          </div>
         </div>
 
         <button
@@ -72,6 +70,7 @@ export function ExerciseEditor({
           aria-label="Remove exercise"
           title="Remove exercise"
           className="
+            mb-1
             shrink-0
             rounded-[6px]
             px-2
@@ -81,9 +80,8 @@ export function ExerciseEditor({
             text-[var(--rose)]
             transition
             hover:bg-[var(--high-bg)]
-          "
-        >
-          Remove
+        ">
+          ×
         </button>
       </div>
 
@@ -114,7 +112,9 @@ export function ExerciseEditor({
                   setIndex={setIndex}
                   value={set}
                   fieldErrors={fieldErrors}
-                  onChange={(field, nextValue) => onChangeSet(set.key, field, nextValue)}
+                  onChange={(field, nextValue) =>
+                    onChangeSet(set.key, field, nextValue)
+                  }
                   onRemove={() => onRemoveSet(set.key)}
                 />
               </div>

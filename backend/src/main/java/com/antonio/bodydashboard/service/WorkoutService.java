@@ -1,5 +1,6 @@
 package com.antonio.bodydashboard.service;
 
+import java.time.LocalDate;
 import java.util.Comparator;
 import java.util.List;
 
@@ -50,6 +51,28 @@ public class WorkoutService {
 				.stream()
 				.map(this::toResponse)
 				.toList();
+	}
+
+	@Transactional(readOnly = true)
+	public List<WorkoutResponse> getByDateRange(LocalDate from, LocalDate to) {
+		if (from == null || to == null) {
+			throw new IllegalArgumentException("Workout date range is required");
+		}
+		if (from.isAfter(to)) {
+			throw new IllegalArgumentException("Workout date range 'from' must not be after 'to'");
+		}
+		return workoutRepository.findByDateBetweenOrderByDateAscCreatedAtAsc(from, to)
+				.stream()
+				.map(this::toResponse)
+				.toList();
+	}
+
+	@Transactional(readOnly = true)
+	public List<WorkoutResponse> getByDate(LocalDate date) {
+		if (date == null) {
+			throw new IllegalArgumentException("Workout date is required");
+		}
+		return getByDateRange(date, date);
 	}
 
 	@Transactional(readOnly = true)

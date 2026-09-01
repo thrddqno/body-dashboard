@@ -26,9 +26,9 @@ The backend stores personal fitness records, exposes REST APIs, computes determi
 ## Request Flow
 
 ```text
-HTTP -> controller -> request validation -> service -> repository -> PostgreSQL
-                                            |
-                                            +-> response DTO -> JSON
+REST/MCP -> adapter -> request validation -> service -> repository -> PostgreSQL
+                                                   |
+                                                   +-> response DTO -> JSON
 ```
 
 Controllers define HTTP semantics. Services own mapping, transactions, business rules, aggregation, and calculations. Repositories own queries. Entities are persistence-only and are never public API responses. `GlobalExceptionHandler` translates selected failures into `ApiError`.
@@ -43,6 +43,8 @@ Controllers define HTTP semantics. Services own mapping, transactions, business 
 | Dashboard snapshot | `DashboardController` | `DashboardService` | All three repositories |
 | Weekly facts | `AnalyticsController` | `WeeklyAnalyticsService` | Body/recovery/workout analytics services |
 | Weekly AI coaching | `AiAnalysisController` | `WeeklyAiAnalysisService` | Context builder plus configured AI provider |
+| Recurring training plans | `TrainingPlanController` | `TrainingPlanService` | `TrainingPlanRepository`, `training_plans` |
+| MCP read tools | `mcp` package | Existing workout, plan, analytics, and analysis services | Spring AI Streamable HTTP adapter |
 
 ## Package Map
 
@@ -57,6 +59,7 @@ Controllers define HTTP semantics. Services own mapping, transactions, business 
 | `repository` | Three Spring Data repositories; children persist through `Workout` |
 | `config` | Application clock and AI provider/property wiring |
 | `exception` | Domain exceptions and selected HTTP error mappings |
+| `mcp` | Conditional read-only MCP tool adapters and input validation |
 
 ## Global Conventions
 
@@ -64,7 +67,7 @@ Controllers define HTTP semantics. Services own mapping, transactions, business 
 - Calendar behavior uses the JVM default time zone through an injected `Clock` where implemented.
 - Lists use newest-first ordering unless a response says otherwise.
 - Missing analytics values serialize as `null`; counts and collections use zero/empty values.
-- There is no authentication, authorization, custom CORS, actuator, scheduler, or background worker.
+- There is no authentication, authorization, custom CORS, actuator, scheduler, or background worker. MCP is disabled by default and must remain local/private.
 - Flyway owns schema changes. Hibernate uses `ddl-auto: validate` and Open EntityManager in View is disabled.
 
 ## Change Guide

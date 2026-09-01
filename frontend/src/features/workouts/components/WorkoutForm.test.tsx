@@ -55,11 +55,32 @@ describe("WorkoutForm", () => {
     });
   });
 
-  it("auto-selects the schedule by date while allowing a dropdown override", () => {
-    render(<WorkoutForm initialDate="2026-08-31" isSubmitting={false} fieldErrors={{}} onSubmit={vi.fn()} />);
+  it("uses backend schedule updates by date while allowing a dropdown override", () => {
+    const onDateChange = vi.fn();
+    const { rerender } = render(
+      <WorkoutForm
+        initialDate="2026-08-31"
+        scheduledWorkoutType="REST"
+        isSubmitting={false}
+        fieldErrors={{}}
+        onSubmit={vi.fn()}
+        onDateChange={onDateChange}
+      />,
+    );
 
     expect(screen.getByLabelText("Workout type")).toHaveValue("REST");
     fireEvent.change(screen.getByLabelText("Date"), { target: { value: "2026-09-01" } });
+    expect(onDateChange).toHaveBeenCalledWith("2026-09-01");
+    rerender(
+      <WorkoutForm
+        initialDate="2026-08-31"
+        scheduledWorkoutType="PUSH"
+        isSubmitting={false}
+        fieldErrors={{}}
+        onSubmit={vi.fn()}
+        onDateChange={onDateChange}
+      />,
+    );
     expect(screen.getByLabelText("Workout type")).toHaveValue("PUSH");
     fireEvent.change(screen.getByLabelText("Workout type"), { target: { value: "UPPER" } });
     expect(screen.getByLabelText("Workout type")).toHaveValue("UPPER");
@@ -78,7 +99,7 @@ describe("WorkoutForm", () => {
 
   it("saves a scheduled rest day without exercises", async () => {
     const onSubmit = vi.fn().mockResolvedValue(true);
-    render(<WorkoutForm initialDate="2026-08-31" isSubmitting={false} fieldErrors={{}} onSubmit={onSubmit} />);
+    render(<WorkoutForm initialDate="2026-08-31" scheduledWorkoutType="REST" isSubmitting={false} fieldErrors={{}} onSubmit={onSubmit} />);
 
     expect(screen.queryByRole("button", { name: "Add exercise" })).not.toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Save rest day" }));
@@ -166,5 +187,21 @@ describe("WorkoutForm", () => {
     expect(screen.getByLabelText("Date")).toBeDisabled();
     expect(screen.getByRole("button", { name: "Add exercise" })).toBeDisabled();
     expect(screen.getByRole("button", { name: "Saving..." })).toBeDisabled();
+  });
+
+  it("disables submission while the selected date schedule is loading", () => {
+    render(
+      <WorkoutForm
+        initialDate="2026-09-01"
+        isSubmitting={false}
+        isScheduleLoading
+        fieldErrors={{}}
+        onSubmit={vi.fn()}
+      />,
+    );
+
+    expect(screen.getByLabelText("Date")).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Add exercise" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Save workout" })).toBeDisabled();
   });
 });

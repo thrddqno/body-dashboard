@@ -15,6 +15,7 @@ Base URL in local development: `http://localhost:8080`. All endpoints consume/pr
 | `GET /api/workouts` | `200` | List all workouts with nested data, newest first |
 | `GET /api/workouts/{id}` | `200` | Get one nested workout |
 | `PATCH /api/workouts/{id}/status` | `200` | Replace only workout status |
+| `GET /api/training-plans/{date}` | `200` | Get a persisted plan for an ISO date and optional workout type |
 | `GET /api/dashboard` | `200` | Get current dashboard snapshot |
 | `GET /api/analytics/weekly` | `200` | Get current calendar-week facts |
 | `POST /api/ai-analysis/weekly` | `200` | Interpret structured facts or return insufficient-data output |
@@ -145,3 +146,10 @@ Handled errors have this shape:
 | Unrecognized persistence integrity failure | `500` |
 
 The application uses `ApiError` for the cases above. Unrecognized persistence failures use a sanitized message and do not expose SQL details. Spring still handles unlisted failures such as unsupported methods and media types, so those response bodies may differ.
+## Training Plans
+
+### `GET /api/training-plans/{date}`
+
+Returns the persisted recurring plan for an ISO `yyyy-MM-dd` date. By default, the date's weekday selects the template. An optional `workoutType` query parameter selects the complete persisted template for a planned override, for example `GET /api/training-plans/2026-09-01?workoutType=UPPER`.
+
+The response includes the requested date and weekday, canonical workout type, display content, exercises, warm-up, guardrails, and optional recovery activities. Workout-type matching is case-insensitive. Invalid dates return `400`; an unconfigured weekday or workout type returns `404`.

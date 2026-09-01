@@ -3,21 +3,24 @@ import { Link } from "react-router-dom";
 import { PlannedWorkoutView } from "@/features/workouts/components/PlannedWorkoutView";
 import { RestDayView } from "@/features/workouts/components/RestDayView";
 import { WorkoutList } from "@/features/workouts/components/WorkoutList";
+import type { TrainingPlan } from "@/types/plannedWorkout";
 import type { Workout } from "@/types/workout";
 import { formatFullDateString } from "@/utils/formatters";
-import { getPlannedWorkout } from "@/utils/workoutPlanResolver";
 
 interface SelectedDayPanelProps {
   selectedDate: string;
   workouts: Workout[];
+  plan?: TrainingPlan | null;
+  planError?: string;
 }
 
 export function SelectedDayPanel({
   selectedDate,
   workouts,
+  plan,
+  planError,
 }: SelectedDayPanelProps) {
   const hasWorkouts = workouts.length > 0;
-  const plan = getPlannedWorkout(selectedDate);
   const hasPlannedWorkout = workouts.some(
     (workout) => workout.status === "PLANNED",
   );
@@ -38,24 +41,26 @@ export function SelectedDayPanel({
       </div>
 
       <div className="mt-6 space-y-4">
+        {planError ? <p className="text-sm text-[var(--danger)]">{planError}</p> : null}
+        {!plan && !planError ? <p className="text-sm text-[var(--muted)]">Loading training plan...</p> : null}
         {hasWorkouts ? (
           <>
             <WorkoutList workouts={workouts} />
 
-            {hasPlannedWorkout && plan.type !== "rest" && (
+            {plan && hasPlannedWorkout && plan.type !== "rest" && (
               <PlannedWorkoutView date={selectedDate} plan={plan} />
             )}
 
-            {plan.type === "rest" && (
+            {plan?.type === "rest" && hasPlannedWorkout && (
               <RestDayView date={selectedDate} plan={plan} />
             )}
 
           </>
-        ) : plan.type === "rest" ? (
+        ) : plan?.type === "rest" ? (
           <RestDayView date={selectedDate} plan={plan} />
-        ) : (
+        ) : plan ? (
           <PlannedWorkoutView date={selectedDate} plan={plan} />
-        )}
+        ) : null}
       </div>
     </section>
   );
