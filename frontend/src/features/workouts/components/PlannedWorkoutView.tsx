@@ -2,6 +2,7 @@ import type { PlannedWorkout } from "@/types/plannedWorkout";
 import { PlannedExerciseCard } from "@/features/workouts/components/PlannedExerciseCard";
 import { WarmupSection } from "@/features/workouts/components/WarmupSection";
 import { GuardrailsSection } from "@/features/workouts/components/GuardrailsSection";
+import { formatPlanEyebrow } from "@/utils/formatters";
 import { Link } from "react-router-dom";
 
 interface PlannedWorkoutViewProps {
@@ -14,7 +15,7 @@ export function PlannedWorkoutView({ date, plan }: PlannedWorkoutViewProps) {
     <div className="space-y-5 border-t border-[var(--ink)]/20">
       <div className="flex mt-6 items-center justify-between gap-4">
         <div>
-          <p className="eyebrow">Today's Plan</p>
+          <p className="eyebrow">{formatPlanEyebrow(date)}</p>
           <h3 className="font-serif-display mt-2 text-2xl font-medium text-[var(--ink)]">
             {plan.title}
           </h3>

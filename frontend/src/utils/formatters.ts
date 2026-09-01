@@ -1,7 +1,7 @@
 import type { EnergyLevel } from "@/types/dailyLog";
 import type { WorkoutStatus } from "@/types/workout";
 
-import { parseLocalDate } from "@/utils/dates";
+import { formatDateInputValue, parseLocalDate } from "@/utils/dates";
 
 const dateFormatter = new Intl.DateTimeFormat(undefined, {
   weekday: "long",
@@ -14,6 +14,10 @@ const compactDateFormatter = new Intl.DateTimeFormat(undefined, {
   weekday: "short",
   month: "short",
   day: "numeric",
+});
+
+const weekdayFormatter = new Intl.DateTimeFormat(undefined, {
+  weekday: "long",
 });
 
 const dateTimeFormatter = new Intl.DateTimeFormat(undefined, {
@@ -47,6 +51,27 @@ export function formatCompactDate(date: Date): string {
 
 export function formatCompactDateString(date: string): string {
   return formatCompactDate(parseLocalDate(date));
+}
+
+export function formatPlanEyebrow(
+  date: string,
+  referenceDate = new Date(),
+): string {
+  const today = new Date(
+    referenceDate.getFullYear(),
+    referenceDate.getMonth(),
+    referenceDate.getDate(),
+  );
+  const yesterday = new Date(today);
+  yesterday.setDate(today.getDate() - 1);
+  const tomorrow = new Date(today);
+  tomorrow.setDate(today.getDate() + 1);
+
+  if (date === formatDateInputValue(yesterday)) return "Yesterday's Plan";
+  if (date === formatDateInputValue(today)) return "Today's Plan";
+  if (date === formatDateInputValue(tomorrow)) return "Tomorrow's Plan";
+
+  return `${weekdayFormatter.format(parseLocalDate(date))}'s Plan`;
 }
 
 export function formatDateTimeString(value: string): string {

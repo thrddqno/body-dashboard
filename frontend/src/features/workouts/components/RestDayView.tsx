@@ -1,4 +1,4 @@
-import { formatCompactDateString } from "@/utils/formatters";
+import { formatPlanEyebrow } from "@/utils/formatters";
 import type { PlannedWorkout } from "@/types/plannedWorkout";
 import { GuardrailsSection } from "@/features/workouts/components/GuardrailsSection";
 
@@ -11,9 +11,9 @@ export function RestDayView({ date, plan }: RestDayViewProps) {
   return (
     <div className="space-y-5">
       <div>
-        <p className="eyebrow">Today's Plan</p>
+        <p className="eyebrow">{formatPlanEyebrow(date)}</p>
         <h3 className="font-serif-display mt-2 text-2xl font-medium text-[var(--ink)]">
-          {formatCompactDateString(date)} · {plan.title}
+          {plan.title}
         </h3>
         <p className="mt-1 text-sm text-[var(--muted)]">
           {plan.subtitle}

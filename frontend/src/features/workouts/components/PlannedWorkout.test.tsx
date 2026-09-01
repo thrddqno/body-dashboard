@@ -34,6 +34,15 @@ function renderPanel(date: string, workouts: Workout[] = []) {
 }
 
 describe("Planned workout fallback", () => {
+  beforeAll(() => {
+    vi.useFakeTimers({ toFake: ["Date"] });
+    vi.setSystemTime(new Date(2026, 8, 1, 12));
+  });
+
+  afterAll(() => {
+    vi.useRealTimers();
+  });
+
   describe("weekday resolution", () => {
     it("resolves Tuesday to Push plan", () => {
       const plan = getPlannedWorkout("2026-09-01");
@@ -105,6 +114,12 @@ describe("Planned workout fallback", () => {
       expect(screen.getByText("Chest, shoulders, triceps")).toBeInTheDocument();
     });
 
+    it("labels a future workout plan with its weekday", () => {
+      renderPanel("2026-09-03");
+
+      expect(screen.getByText("Thursday's Plan")).toBeInTheDocument();
+    });
+
     it("renders Pull plan when no workout logged on Wednesday", () => {
       renderPanel("2026-09-02");
 
@@ -138,7 +153,7 @@ describe("Planned workout fallback", () => {
     it("renders rest day for Friday with recovery messaging", () => {
       renderPanel("2026-09-04");
 
-      expect(screen.getByText(/Fri, Sep 4 · Rest/)).toBeInTheDocument();
+      expect(screen.getByRole("heading", { name: "Rest" })).toBeInTheDocument();
       expect(screen.getByText("Recovery / sleep protection")).toBeInTheDocument();
       expect(screen.getByText("This is a recovery day, not a missed lifting slot.")).toBeInTheDocument();
       expect(screen.getByText("Optional")).toBeInTheDocument();
@@ -148,7 +163,7 @@ describe("Planned workout fallback", () => {
     it("renders rest day for Monday with recovery messaging", () => {
       renderPanel("2026-09-07");
 
-      expect(screen.getByText(/Mon, Sep 7 · Rest/)).toBeInTheDocument();
+      expect(screen.getByRole("heading", { name: "Rest" })).toBeInTheDocument();
       expect(screen.getByText("Recovery day")).toBeInTheDocument();
       expect(screen.getByText("This is an intentional rest day.")).toBeInTheDocument();
     });
@@ -158,6 +173,12 @@ describe("Planned workout fallback", () => {
 
       expect(screen.queryByText("Missed")).not.toBeInTheDocument();
       expect(screen.queryByText("This is a missed session")).not.toBeInTheDocument();
+    });
+
+    it("labels a future rest plan with its weekday", () => {
+      renderPanel("2026-09-04");
+
+      expect(screen.getByText("Friday's Plan")).toBeInTheDocument();
     });
   });
 

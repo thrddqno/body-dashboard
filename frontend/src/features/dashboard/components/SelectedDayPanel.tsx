@@ -45,6 +45,11 @@ export function SelectedDayPanel({
             {hasPlannedWorkout && plan.type !== "rest" && (
               <PlannedWorkoutView date={selectedDate} plan={plan} />
             )}
+
+            {plan.type === "rest" && (
+              <RestDayView date={selectedDate} plan={plan} />
+            )}
+
           </>
         ) : plan.type === "rest" ? (
           <RestDayView date={selectedDate} plan={plan} />
