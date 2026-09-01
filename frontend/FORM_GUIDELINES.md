@@ -19,7 +19,7 @@ Forms collect and map input. Domain rules and authoritative validation remain in
 
 ## Styling
 
-- Use `.form-control`, `.form-label`, `.form-label-text`, `.form-help`, `.form-error`, and `.form-checkbox` for repeated form styling.
+- Use `.form-control`, `.form-label`, `.form-label-text`, `.form-help`, `.form-error`, and `.form-checkbox` for repeated form styling. Pair `.form-control-compact` with `.form-control` only when a dense editor needs smaller controls.
 - Use Tailwind utilities for feature-specific spacing, grids, responsive layout, and column spans.
 - Use `.button-primary` and `.button-secondary` for actions.
 - Preserve the design tokens in `src/index.css`; do not add feature-specific color systems.

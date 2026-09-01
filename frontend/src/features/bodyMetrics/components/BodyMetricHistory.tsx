@@ -20,8 +20,8 @@ export function BodyMetricHistory({ metrics }: BodyMetricHistoryProps) {
     <div className="panel p-6">
       <h2 className="font-serif-display text-2xl font-medium text-[var(--ink)]">Measurement history</h2>
       <div className="mt-6 overflow-x-auto">
-        <table className="min-w-full text-left text-sm text-slate-300">
-          <thead className="text-xs uppercase tracking-[0.16em] text-slate-500">
+        <table className="min-w-[560px] text-left text-sm text-[var(--ink)]">
+          <thead className="text-xs uppercase tracking-[0.16em] text-[var(--muted)]">
             <tr>
               <th className="pb-3 font-medium">Date</th>
               <th className="pb-3 font-medium">Weight</th>
@@ -31,7 +31,7 @@ export function BodyMetricHistory({ metrics }: BodyMetricHistoryProps) {
           </thead>
           <tbody>
             {metrics.map((metric) => (
-              <tr key={metric.id} className="border-t border-slate-800 align-top">
+              <tr key={metric.id} className="border-t border-[var(--line)] align-top">
                 <td className="py-3">{formatFullDateString(metric.date)}</td>
                 <td className="py-3">{formatMetricValue(metric.weightKg, "kg")}</td>
                 <td className="py-3">{formatMetricValue(metric.waistCm, "cm")}</td>

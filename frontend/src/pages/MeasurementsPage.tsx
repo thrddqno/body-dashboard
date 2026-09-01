@@ -105,7 +105,7 @@ export function MeasurementsPage() {
               </div>
             </section>
           </div>
-          <ChartPanel title="Measurement trends" description="Charts show only recorded values on their real dates.">
+          <ChartPanel title="Measurement trends" description="Each measurement uses its own scale and is plotted on its recorded date.">
             <BodyMetricChart metrics={metrics} />
           </ChartPanel>
           <BodyMetricHistory metrics={metrics} />

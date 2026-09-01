@@ -143,6 +143,17 @@ button {
   padding: 0.75rem 0.875rem;
 }
 
+.form-control-compact {
+  height: 2.25rem;
+  border-radius: 6px;
+  padding: 0.35rem 0.5rem;
+  font-size: 0.875rem;
+}
+
+.form-control-with-unit {
+  padding-right: 2rem;
+}
+
 .form-label {
   display: block;
   color: var(--ink);

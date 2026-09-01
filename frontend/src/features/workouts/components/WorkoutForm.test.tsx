@@ -65,7 +65,7 @@ describe("WorkoutForm", () => {
     expect(screen.getByLabelText("Workout type")).toHaveValue("UPPER");
   });
 
-  it("places add exercise left and save workout right in one action row", () => {
+  it("keeps workout actions ordered and stacks them on narrow screens", () => {
     render(<WorkoutForm initialDate="2026-09-01" isSubmitting={false} fieldErrors={{}} onSubmit={vi.fn()} />);
 
     const actions = screen.getByRole("group", { name: "Workout actions" });
@@ -73,7 +73,7 @@ describe("WorkoutForm", () => {
       "Add exercise",
       "Save workout",
     ]);
-    expect(actions).toHaveClass("justify-between");
+    expect(actions).toHaveClass("flex-col", "justify-between", "sm:flex-row");
   });
 
   it("saves a scheduled rest day without exercises", async () => {
@@ -119,6 +119,16 @@ describe("WorkoutForm", () => {
     fireEvent.click(screen.getByRole("button", { name: "Remove set 2" }));
     fireEvent.click(screen.getByRole("button", { name: "Remove set 1" }));
     expect(screen.getByRole("button", { name: "Copy last set" })).toBeDisabled();
+  });
+
+  it("uses compact standard controls and reflows set fields on narrow screens", () => {
+    render(<WorkoutForm initialDate="2026-09-01" isSubmitting={false} fieldErrors={{}} onSubmit={vi.fn()} />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Add exercise" }));
+
+    const weight = screen.getByLabelText("Weight (kg)");
+    expect(weight).toHaveClass("form-control", "form-control-compact");
+    expect(weight.parentElement?.parentElement).toHaveClass("col-span-2", "sm:col-span-1");
   });
 
   it("associates nested backend errors with their controls", () => {

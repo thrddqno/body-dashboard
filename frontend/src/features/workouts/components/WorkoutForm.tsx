@@ -123,20 +123,20 @@ export function WorkoutForm({
 
   return (
     <form className="panel overflow-hidden" onSubmit={handleSubmit} aria-busy={isSubmitting}>
-      <div className="p-6 pb-2">
+      <div className="p-4 pb-2 sm:p-6 sm:pb-2">
         <p className="eyebrow">{isEditing ? "Edit record" : "New record"}</p>
-        <h2 className="font-serif-display mt-2 text-3xl font-medium text-[var(--ink)]">
+        <h2 className="font-serif-display mt-2 text-2xl font-medium text-[var(--ink)]">
           {isEditing ? "Edit workout" : "Create workout"}
         </h2>
-        <p className="mt-2 max-w-xl text-sm leading-6 text-[var(--muted)]">
+        <p className="form-help mt-2 max-w-xl">
           {isEditing
             ? "Update workout details. Exercise content will be fully replaced."
             : "Log the day first, then add exercise details only when they apply. REST days never require exercises."}
         </p>
       </div>
 
-      <fieldset disabled={isSubmitting} className="p-6">
-        <div className="grid gap-5 md:grid-cols-2">
+      <fieldset disabled={isSubmitting} className="p-4 sm:p-6">
+        <div className="grid gap-4 md:grid-cols-2">
           <div>
             <label htmlFor="workout-date" className="form-label">
               <span className="form-label-text">Date</span>
@@ -182,7 +182,7 @@ export function WorkoutForm({
         </div>
       </fieldset>
 
-      <fieldset disabled={isSubmitting} className="border-t border-[var(--line)] p-6">
+      <fieldset disabled={isSubmitting} className="border-t border-[var(--line)] p-4 sm:p-6">
         <legend className="sr-only">Exercise details</legend>
         <div>
           <p className="text-sm font-black uppercase text-[var(--ink)]">Exercise details</p>
@@ -271,15 +271,15 @@ export function WorkoutForm({
         <FieldError id="workout-exercises-error" message={fieldErrors.exercises} />
       </fieldset>
 
-      <div className="border-t border-[var(--line)] bg-[var(--paper)] px-6 py-5">
+      <div className="border-t border-[var(--line)] bg-[var(--paper)] px-4 py-4 sm:px-6 sm:py-5">
         {formError ? <p role="alert" className="form-error mb-4 mt-0">{formError}</p> : null}
-        <div role="group" aria-label="Workout actions" className="flex items-center justify-between gap-4">
+        <div role="group" aria-label="Workout actions" className="flex flex-col items-stretch justify-between gap-3 sm:flex-row sm:items-center sm:gap-4">
           {workoutType !== "REST" ? (
-            <button type="button" disabled={isSubmitting} onClick={() => setExercises((current) => [...current, createExercise()])} className="button-secondary">
+            <button type="button" disabled={isSubmitting} onClick={() => setExercises((current) => [...current, createExercise()])} className="button-secondary w-full sm:w-auto">
               Add exercise
             </button>
-          ) : <span />}
-          <button type="submit" disabled={isSubmitting} className="button-primary">
+          ) : null}
+          <button type="submit" disabled={isSubmitting} className="button-primary w-full sm:ml-auto sm:w-auto">
             {isSubmitting ? "Saving..." : isEditing ? "Update workout" : workoutType === "REST" ? "Save rest day" : "Save workout"}
           </button>
         </div>

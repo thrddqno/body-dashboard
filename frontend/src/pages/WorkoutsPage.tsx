@@ -77,9 +77,8 @@ export function WorkoutsPage() {
         eyebrow="Workouts"
         title="Workout log"
         description="Record the scheduled day, then add exercise details only when they apply. Existing records are read-only except for status."
-        showDivider={false}
       />
-      <div className="grid items-start gap-8 xl:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
+      <div className="grid min-w-0 items-start gap-6 xl:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)] xl:gap-8">
         <WorkoutForm
           initialDate={formatDateInputValue(new Date())}
           isSubmitting={isSubmitting}
