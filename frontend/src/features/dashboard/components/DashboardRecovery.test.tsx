@@ -44,7 +44,17 @@ describe("dashboard recovery states", () => {
   it("marks missed workouts as incomplete without creating training debt", () => {
     render(
       <MemoryRouter>
-        <WorkoutLog workouts={[missedWorkout]} />
+        <WorkoutLog
+          workouts={[missedWorkout]}
+          page={0}
+          pageSize={7}
+          totalElements={1}
+          totalPages={1}
+          isLoading={false}
+          onPageChange={vi.fn()}
+          onPageSizeChange={vi.fn()}
+          onRetry={vi.fn()}
+        />
       </MemoryRouter>,
     );
 

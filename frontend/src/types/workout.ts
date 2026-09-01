@@ -27,6 +27,14 @@ export interface Workout {
   updatedAt: string;
 }
 
+export interface WorkoutPage {
+  workouts: Workout[];
+  page: number;
+  pageSize: number;
+  totalElements: number;
+  totalPages: number;
+}
+
 export interface WorkoutSummary {
   id: number;
   date: string;

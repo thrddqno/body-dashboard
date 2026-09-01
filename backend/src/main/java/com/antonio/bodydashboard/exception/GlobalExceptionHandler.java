@@ -10,6 +10,7 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
@@ -98,11 +99,14 @@ public class GlobalExceptionHandler {
 
 	@ExceptionHandler(MethodArgumentTypeMismatchException.class)
 	public ResponseEntity<ApiError> handleTypeMismatch(MethodArgumentTypeMismatchException exception) {
+		String location = exception.getParameter().hasParameterAnnotation(RequestParam.class)
+				? "parameter"
+				: "path";
 		return ResponseEntity.badRequest()
 				.body(ApiError.of(
 						HttpStatus.BAD_REQUEST.value(),
 						HttpStatus.BAD_REQUEST.getReasonPhrase(),
-						"Request path contains an invalid value"));
+						"Request " + location + " contains an invalid value"));
 	}
 
 	@ExceptionHandler(DataIntegrityViolationException.class)
@@ -120,6 +124,15 @@ public class GlobalExceptionHandler {
 				.body(ApiError.of(
 						HttpStatus.CONFLICT.value(),
 						HttpStatus.CONFLICT.getReasonPhrase(),
+						exception.getMessage()));
+	}
+
+	@ExceptionHandler(InvalidRequestException.class)
+	public ResponseEntity<ApiError> handleInvalidRequest(InvalidRequestException exception) {
+		return ResponseEntity.badRequest()
+				.body(ApiError.of(
+						HttpStatus.BAD_REQUEST.value(),
+						HttpStatus.BAD_REQUEST.getReasonPhrase(),
 						exception.getMessage()));
 	}
 }

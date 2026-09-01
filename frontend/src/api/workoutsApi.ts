@@ -1,12 +1,30 @@
 import { requestJson, toJsonBody } from "@/api/httpClient";
 import type {
   Workout,
+  WorkoutPage,
   WorkoutRequest,
   WorkoutStatus,
 } from "@/types/workout";
 
 export function listWorkouts(signal?: AbortSignal): Promise<Workout[]> {
   return requestJson<Workout[]>("/workouts", { signal });
+}
+
+export function listWorkoutsByDateRange(
+  from: string,
+  to: string,
+  signal?: AbortSignal,
+): Promise<Workout[]> {
+  const query = new URLSearchParams({ from, to });
+  return requestJson<Workout[]>(`/workouts?${query}`, { signal });
+}
+
+export function listWorkoutPage(
+  page: number,
+  pageSize: number,
+  signal?: AbortSignal,
+): Promise<WorkoutPage> {
+  return requestJson<WorkoutPage>(`/workouts/page?page=${page}&size=${pageSize}`, { signal });
 }
 
 export function getWorkout(id: string, signal?: AbortSignal): Promise<Workout> {

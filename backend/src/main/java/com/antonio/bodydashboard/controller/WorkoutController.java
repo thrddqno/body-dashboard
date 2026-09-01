@@ -1,6 +1,7 @@
 package com.antonio.bodydashboard.controller;
 
 import java.net.URI;
+import java.time.LocalDate;
 import java.util.List;
 
 import org.springframework.http.ResponseEntity;
@@ -11,10 +12,12 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import com.antonio.bodydashboard.dto.WorkoutRequest;
+import com.antonio.bodydashboard.dto.WorkoutPageResponse;
 import com.antonio.bodydashboard.dto.WorkoutResponse;
 import com.antonio.bodydashboard.dto.WorkoutStatusUpdateRequest;
 import com.antonio.bodydashboard.service.WorkoutService;
@@ -42,8 +45,20 @@ public class WorkoutController {
 	}
 
 	@GetMapping
-	public List<WorkoutResponse> listWorkouts() {
-		return workoutService.getAll();
+	public List<WorkoutResponse> listWorkouts(
+			@RequestParam(required = false) LocalDate from,
+			@RequestParam(required = false) LocalDate to) {
+		if (from == null && to == null) {
+			return workoutService.getAll();
+		}
+		return workoutService.getByDateRange(from, to);
+	}
+
+	@GetMapping("/page")
+	public WorkoutPageResponse listWorkoutPage(
+			@RequestParam(defaultValue = "0") int page,
+			@RequestParam(defaultValue = "7") int size) {
+		return workoutService.getPage(page, size);
 	}
 
 	@GetMapping("/{id}")

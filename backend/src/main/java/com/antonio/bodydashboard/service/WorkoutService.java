@@ -3,7 +3,10 @@ package com.antonio.bodydashboard.service;
 import java.time.LocalDate;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Set;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -11,17 +14,20 @@ import com.antonio.bodydashboard.dto.ExerciseSetRequest;
 import com.antonio.bodydashboard.dto.ExerciseSetResponse;
 import com.antonio.bodydashboard.dto.WorkoutExerciseRequest;
 import com.antonio.bodydashboard.dto.WorkoutExerciseResponse;
+import com.antonio.bodydashboard.dto.WorkoutPageResponse;
 import com.antonio.bodydashboard.dto.WorkoutRequest;
 import com.antonio.bodydashboard.dto.WorkoutResponse;
 import com.antonio.bodydashboard.entity.ExerciseSet;
 import com.antonio.bodydashboard.entity.Workout;
 import com.antonio.bodydashboard.entity.WorkoutExercise;
 import com.antonio.bodydashboard.entity.WorkoutStatus;
+import com.antonio.bodydashboard.exception.InvalidRequestException;
 import com.antonio.bodydashboard.exception.WorkoutNotFoundException;
 import com.antonio.bodydashboard.repository.WorkoutRepository;
 
 @Service
 public class WorkoutService {
+	private static final Set<Integer> SUPPORTED_PAGE_SIZES = Set.of(7, 15, 30);
 
 	private final WorkoutRepository workoutRepository;
 
@@ -54,12 +60,31 @@ public class WorkoutService {
 	}
 
 	@Transactional(readOnly = true)
+	public WorkoutPageResponse getPage(int page, int pageSize) {
+		if (page < 0) {
+			throw new InvalidRequestException("Workout page must be greater than or equal to 0");
+		}
+		if (!SUPPORTED_PAGE_SIZES.contains(pageSize)) {
+			throw new InvalidRequestException("Workout page size must be one of 7, 15, or 30");
+		}
+
+		Page<Workout> workoutPage = workoutRepository.findAllByOrderByDateDescCreatedAtDescIdDesc(
+				PageRequest.of(page, pageSize));
+		return new WorkoutPageResponse(
+				workoutPage.getContent().stream().map(this::toResponse).toList(),
+				workoutPage.getNumber(),
+				workoutPage.getSize(),
+				workoutPage.getTotalElements(),
+				workoutPage.getTotalPages());
+	}
+
+	@Transactional(readOnly = true)
 	public List<WorkoutResponse> getByDateRange(LocalDate from, LocalDate to) {
 		if (from == null || to == null) {
-			throw new IllegalArgumentException("Workout date range is required");
+			throw new InvalidRequestException("Workout date range requires both 'from' and 'to'");
 		}
 		if (from.isAfter(to)) {
-			throw new IllegalArgumentException("Workout date range 'from' must not be after 'to'");
+			throw new InvalidRequestException("Workout date range 'from' must not be after 'to'");
 		}
 		return workoutRepository.findByDateBetweenOrderByDateAscCreatedAtAsc(from, to)
 				.stream()
@@ -70,7 +95,7 @@ public class WorkoutService {
 	@Transactional(readOnly = true)
 	public List<WorkoutResponse> getByDate(LocalDate date) {
 		if (date == null) {
-			throw new IllegalArgumentException("Workout date is required");
+			throw new InvalidRequestException("Workout date is required");
 		}
 		return getByDateRange(date, date);
 	}

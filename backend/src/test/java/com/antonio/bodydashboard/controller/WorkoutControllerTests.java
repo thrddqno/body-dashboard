@@ -227,6 +227,121 @@ class WorkoutControllerTests {
 	}
 
 	@Test
+	void returnsWorkoutsWithinRequestedDateRange() throws Exception {
+		createWorkout(workoutRequest(LocalDate.of(2026, 8, 24), "PUSH", WorkoutStatus.COMPLETED, List.of()));
+		createWorkout(workoutRequest(LocalDate.of(2026, 8, 26), "PULL", WorkoutStatus.COMPLETED, List.of()));
+		createWorkout(workoutRequest(LocalDate.of(2026, 8, 28), "LEGS", WorkoutStatus.COMPLETED, List.of()));
+
+		mockMvc.perform(get("/api/workouts")
+					.param("from", "2026-08-25")
+					.param("to", "2026-08-27"))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$", hasSize(1)))
+				.andExpect(jsonPath("$[0].date").value("2026-08-26"));
+	}
+
+	@Test
+	void rejectsIncompleteOrInvalidWorkoutDateRange() throws Exception {
+		mockMvc.perform(get("/api/workouts").param("from", "2026-08-25"))
+				.andExpect(status().isBadRequest())
+				.andExpect(jsonPath("$.message").value("Workout date range requires both 'from' and 'to'"));
+
+		mockMvc.perform(get("/api/workouts")
+					.param("from", "2026-08-27")
+					.param("to", "2026-08-25"))
+				.andExpect(status().isBadRequest())
+				.andExpect(jsonPath("$.message").value("Workout date range 'from' must not be after 'to'"));
+
+		mockMvc.perform(get("/api/workouts/page").param("page", "invalid"))
+				.andExpect(status().isBadRequest())
+				.andExpect(jsonPath("$.message").value("Request parameter contains an invalid value"));
+	}
+
+	@Test
+	void returnsPaginatedWorkoutsNewestFirst() throws Exception {
+		for (int day = 1; day <= 16; day++) {
+			createWorkout(workoutRequest(
+					LocalDate.of(2026, 8, day),
+					"WORKOUT-" + day,
+					WorkoutStatus.COMPLETED,
+					List.of()));
+		}
+
+		mockMvc.perform(get("/api/workouts/page"))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.workouts", hasSize(7)))
+				.andExpect(jsonPath("$.workouts[0].date").value("2026-08-16"))
+				.andExpect(jsonPath("$.workouts[6].date").value("2026-08-10"))
+				.andExpect(jsonPath("$.page").value(0))
+				.andExpect(jsonPath("$.pageSize").value(7))
+				.andExpect(jsonPath("$.totalElements").value(16))
+				.andExpect(jsonPath("$.totalPages").value(3));
+
+		mockMvc.perform(get("/api/workouts/page").param("page", "1").param("size", "7"))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.workouts", hasSize(7)))
+				.andExpect(jsonPath("$.workouts[0].date").value("2026-08-09"))
+				.andExpect(jsonPath("$.workouts[6].date").value("2026-08-03"))
+				.andExpect(jsonPath("$.page").value(1));
+	}
+
+	@Test
+	void supportsConfiguredWorkoutPageSizes() throws Exception {
+		for (int day = 1; day <= 16; day++) {
+			createWorkout(workoutRequest(
+					LocalDate.of(2026, 8, day),
+					"WORKOUT-" + day,
+					WorkoutStatus.COMPLETED,
+					List.of()));
+		}
+
+		mockMvc.perform(get("/api/workouts/page").param("size", "15"))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.workouts", hasSize(15)))
+				.andExpect(jsonPath("$.pageSize").value(15))
+				.andExpect(jsonPath("$.totalPages").value(2));
+
+		mockMvc.perform(get("/api/workouts/page").param("size", "30"))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.workouts", hasSize(16)))
+				.andExpect(jsonPath("$.pageSize").value(30))
+				.andExpect(jsonPath("$.totalPages").value(1));
+	}
+
+	@Test
+	void returnsPartialAndOutOfRangeWorkoutPages() throws Exception {
+		for (int day = 1; day <= 8; day++) {
+			createWorkout(workoutRequest(
+					LocalDate.of(2026, 8, day),
+					"WORKOUT-" + day,
+					WorkoutStatus.COMPLETED,
+					List.of()));
+		}
+
+		mockMvc.perform(get("/api/workouts/page").param("page", "1"))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.workouts", hasSize(1)))
+				.andExpect(jsonPath("$.workouts[0].date").value("2026-08-01"));
+
+		mockMvc.perform(get("/api/workouts/page").param("page", "2"))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.workouts", hasSize(0)))
+				.andExpect(jsonPath("$.page").value(2))
+				.andExpect(jsonPath("$.totalPages").value(2));
+	}
+
+	@Test
+	void rejectsInvalidWorkoutPagination() throws Exception {
+		mockMvc.perform(get("/api/workouts/page").param("page", "-1"))
+				.andExpect(status().isBadRequest())
+				.andExpect(jsonPath("$.message").value("Workout page must be greater than or equal to 0"));
+
+		mockMvc.perform(get("/api/workouts/page").param("size", "10"))
+				.andExpect(status().isBadRequest())
+				.andExpect(jsonPath("$.message").value("Workout page size must be one of 7, 15, or 30"));
+	}
+
+	@Test
 	void returnsNotFoundForMissingWorkout() throws Exception {
 		mockMvc.perform(get("/api/workouts/{id}", 999L))
 				.andExpect(status().isNotFound())
