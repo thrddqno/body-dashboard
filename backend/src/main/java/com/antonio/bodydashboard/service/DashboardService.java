@@ -11,6 +11,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.antonio.bodydashboard.config.FitnessGoals;
 import com.antonio.bodydashboard.dto.BodyMetricResponse;
 import com.antonio.bodydashboard.dto.DailyLogResponse;
 import com.antonio.bodydashboard.dto.DashboardResponse;
@@ -28,9 +29,9 @@ import com.antonio.bodydashboard.service.analytics.WorkoutAnalyticsSummary;
 public class DashboardService {
 
 	private static final int RECENT_BODY_METRIC_LIMIT = 30;
-	private static final BigDecimal TARGET_WEIGHT_KG = new BigDecimal("80.0");
 
 	private final Clock clock;
+	private final FitnessGoals fitnessGoals;
 	private final BodyMetricRepository bodyMetricRepository;
 	private final DailyLogRepository dailyLogRepository;
 	private final WorkoutRepository workoutRepository;
@@ -38,11 +39,13 @@ public class DashboardService {
 
 	public DashboardService(
 			Clock clock,
+			FitnessGoals fitnessGoals,
 			BodyMetricRepository bodyMetricRepository,
 			DailyLogRepository dailyLogRepository,
 			WorkoutRepository workoutRepository,
 			WorkoutAnalyticsService workoutAnalyticsService) {
 		this.clock = clock;
+		this.fitnessGoals = fitnessGoals;
 		this.bodyMetricRepository = bodyMetricRepository;
 		this.dailyLogRepository = dailyLogRepository;
 		this.workoutRepository = workoutRepository;
@@ -66,8 +69,9 @@ public class DashboardService {
 		BigDecimal currentWeightKg = recentMetrics.isEmpty() ? null : recentMetrics.getFirst().weightKg();
 		DashboardResponse.Body bodyResponse = new DashboardResponse.Body(
 				currentWeightKg,
-				TARGET_WEIGHT_KG,
+				fitnessGoals.activeTargetKg(),
 				weightRemainingKg(currentWeightKg),
+				toGoal(fitnessGoals),
 				recentMetrics);
 		DashboardResponse.Training trainingResponse = new DashboardResponse.Training(
 				workoutRepository.findFirstByOrderByDateDescIdDesc().map(this::toWorkoutSummaryResponse).orElse(null),
@@ -81,7 +85,21 @@ public class DashboardService {
 		if (currentWeightKg == null) {
 			return null;
 		}
-		return currentWeightKg.subtract(TARGET_WEIGHT_KG).max(BigDecimal.ZERO);
+		return currentWeightKg.subtract(fitnessGoals.activeTargetKg()).max(BigDecimal.ZERO);
+	}
+
+	private DashboardResponse.Goal toGoal(FitnessGoals goals) {
+		return new DashboardResponse.Goal(
+				FitnessGoals.BASELINE_DATE,
+				FitnessGoals.BASELINE_WEIGHT_KG,
+				goals.activeTargetKg(),
+				goals.stage2MinKg(),
+				goals.stage2MaxKg(),
+				FitnessGoals.CALORIE_TARGET_KCAL,
+				FitnessGoals.ESTIMATED_MAINTENANCE_MIN_KCAL,
+				FitnessGoals.ESTIMATED_MAINTENANCE_MAX_KCAL,
+				FitnessGoals.MIN_WEIGHT_LOSS_KG_PER_WEEK,
+				FitnessGoals.MAX_WEIGHT_LOSS_KG_PER_WEEK);
 	}
 
 	private BodyMetricResponse toBodyMetricResponse(BodyMetric bodyMetric) {

@@ -8,6 +8,8 @@ import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
+import com.antonio.bodydashboard.config.FitnessGoals;
+
 /**
  * Deterministic, weight-loss-centric readiness decision.
  *
@@ -17,12 +19,15 @@ import org.springframework.stereotype.Service;
 @Service
 public class ReadinessDecisionService {
 
-	public static final BigDecimal TARGET_WEIGHT_KG = new BigDecimal("80.0");
-
 	private static final BigDecimal LOW_SLEEP_THRESHOLD_HOURS = new BigDecimal("6.0");
 	private static final BigDecimal LOW_ADHERENCE_THRESHOLD_PERCENT = new BigDecimal("50.0");
 	private static final BigDecimal GOOD_ADHERENCE_THRESHOLD_PERCENT = new BigDecimal("70.0");
-	private static final BigDecimal ON_TARGET_WEIGHT_LOSS_KG = new BigDecimal("0.25");
+
+	private final FitnessGoals fitnessGoals;
+
+	public ReadinessDecisionService(FitnessGoals fitnessGoals) {
+		this.fitnessGoals = fitnessGoals;
+	}
 
 	public ReadinessDecision decide(ReadinessDecision.Inputs inputs) {
 		List<String> factors = new ArrayList<>();
@@ -58,7 +63,7 @@ public class ReadinessDecisionService {
 		}
 
 		boolean goodAdherence = adherence.map(value -> value.compareTo(GOOD_ADHERENCE_THRESHOLD_PERCENT) >= 0).orElse(false);
-		boolean onTargetWeightLoss = weightChange.map(value -> value.compareTo(ON_TARGET_WEIGHT_LOSS_KG) >= 0).orElse(false);
+		boolean onTargetWeightLoss = weightChange.map(this::isOnTargetWeightLoss).orElse(false);
 
 		if (onTargetWeightLoss && goodAdherence) {
 			return new ReadinessDecision(ReadinessDecision.Verdict.PROGRESS, true, factors);
@@ -88,11 +93,26 @@ public class ReadinessDecisionService {
 
 	private void addWeightFactor(List<String> factors, BigDecimal weeklyChangeKg) {
 		BigDecimal rounded = weeklyChangeKg.setScale(2, RoundingMode.HALF_UP);
-		if (weeklyChangeKg.compareTo(ON_TARGET_WEIGHT_LOSS_KG) >= 0) {
-			factors.add("Weekly weight change was -" + rounded.abs() + "kg, on track toward the " + TARGET_WEIGHT_KG + "kg target.");
+		BigDecimal weeklyLossKg = weeklyChangeKg.negate();
+		BigDecimal target = fitnessGoals.activeTargetKg().stripTrailingZeros();
+		if (isOnTargetWeightLoss(weeklyChangeKg)) {
+			factors.add("Weekly weight change was " + signedChange(rounded) + "kg, on track toward the " + target + "kg target.");
+		} else if (weeklyLossKg.compareTo(FitnessGoals.MIN_WEIGHT_LOSS_KG_PER_WEEK) < 0) {
+			factors.add("Weekly weight change was " + signedChange(rounded) + "kg, below the "
+					+ FitnessGoals.MIN_WEIGHT_LOSS_KG_PER_WEEK + "kg weekly loss pace.");
 		} else {
-			factors.add("Weekly weight change was " + (weeklyChangeKg.compareTo(BigDecimal.ZERO) < 0 ? "-" + rounded.abs() : "+" + rounded)
-					+ "kg, below the " + ON_TARGET_WEIGHT_LOSS_KG + "kg weekly loss pace.");
+			factors.add("Weekly weight change was " + signedChange(rounded) + "kg, above the "
+					+ FitnessGoals.MAX_WEIGHT_LOSS_KG_PER_WEEK + "kg weekly loss pace.");
 		}
+	}
+
+	private boolean isOnTargetWeightLoss(BigDecimal weeklyChangeKg) {
+		BigDecimal weeklyLossKg = weeklyChangeKg.negate();
+		return weeklyLossKg.compareTo(FitnessGoals.MIN_WEIGHT_LOSS_KG_PER_WEEK) >= 0
+				&& weeklyLossKg.compareTo(FitnessGoals.MAX_WEIGHT_LOSS_KG_PER_WEEK) <= 0;
+	}
+
+	private String signedChange(BigDecimal weeklyChangeKg) {
+		return weeklyChangeKg.compareTo(BigDecimal.ZERO) > 0 ? "+" + weeklyChangeKg : weeklyChangeKg.toPlainString();
 	}
 }

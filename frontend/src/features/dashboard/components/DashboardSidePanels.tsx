@@ -128,13 +128,16 @@ export function DashboardSidePanels({
           {dashboard.body.weightRemainingKg == null
             ? "Not available"
             : dashboard.body.weightRemainingKg === 0
-              ? "Target met"
+              ? "Milestone reached"
               : `${formatMetricValue(dashboard.body.weightRemainingKg, "kg")} to go.`}
         </p>
         <p className="mt-1 text-xs text-[var(--green-copy)]">
           {formatMetricValue(dashboard.body.currentWeightKg, "kg")} now, aiming
-          for {formatMetricValue(dashboard.body.targetWeightKg, "kg")} while
-          prioritizing freer movement and recoverable training.
+          for{" "}
+          {formatMetricValue(dashboard.body.goal.stage1TargetKg, "kg")} this
+          stage, then {formatMetricValue(dashboard.body.goal.stage2MinKg, "kg")}–
+          {formatMetricValue(dashboard.body.goal.stage2MaxKg, "kg")} after
+          reassessment.
         </p>
         {dashboard.body.currentWeightKg == null ? (
           <p className="mt-3 text-xs leading-5 text-[var(--green-copy)]">
@@ -142,6 +145,19 @@ export function DashboardSidePanels({
           </p>
         ) : null}
         <dl className="mt-5 divide-y divide-[var(--green-line)] border-t border-[var(--green-copy)]/20 text-xs">
+          <div className="flex justify-between gap-4 py-3">
+            <dt className="text-[var(--green-copy)]">Calorie target</dt>
+            <dd className="font-bold text-[var(--lime)]">
+              {dashboard.body.goal.calorieTargetKcal.toLocaleString()} kcal/day
+            </dd>
+          </div>
+          <div className="flex justify-between gap-4 py-3">
+            <dt className="text-[var(--green-copy)]">Planned loss rate</dt>
+            <dd className="font-bold text-[var(--lime)]">
+              {dashboard.body.goal.minWeightLossKgPerWeek}–
+              {dashboard.body.goal.maxWeightLossKgPerWeek} kg/week
+            </dd>
+          </div>
           <div className="flex justify-between gap-4 py-3">
             <dt className="text-[var(--green-copy)]">Current Gap</dt>
             <dd className="font-bold text-[var(--lime)]">

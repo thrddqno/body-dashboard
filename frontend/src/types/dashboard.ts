@@ -9,8 +9,20 @@ export interface DashboardResponse {
   };
   body: {
     currentWeightKg: number | null;
-    targetWeightKg: number;
+    activeTargetKg: number;
     weightRemainingKg: number | null;
+    goal: {
+      baselineDate: string;
+      baselineWeightKg: number;
+      stage1TargetKg: number;
+      stage2MinKg: number;
+      stage2MaxKg: number;
+      calorieTargetKcal: number;
+      estimatedMaintenanceMinKcal: number;
+      estimatedMaintenanceMaxKcal: number;
+      minWeightLossKgPerWeek: number;
+      maxWeightLossKgPerWeek: number;
+    };
     recentMetrics: BodyMetric[];
   };
   training: {
