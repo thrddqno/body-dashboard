@@ -20,7 +20,7 @@ export function PlannedExerciseCard({ exercise }: PlannedExerciseCardProps) {
   }
 
   return (
-    <div className="rounded-[8px] border border-[var(--line)] bg-white p-5">
+    <div className="rounded-[8px] border border-[var(--panel-border)] bg-[var(--card)] p-5">
       <h4 className="font-serif-display text-lg font-medium text-[var(--ink)]">
         {exercise.name}
       </h4>

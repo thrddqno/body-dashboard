@@ -36,7 +36,7 @@ export function WeeklySummary({ analytics }: WeeklySummaryProps) {
   ];
 
   return (
-    <section aria-label="Weekly metrics" className="overflow-hidden rounded-[8px] bg-[var(--ink)] text-white">
+    <section aria-label="Weekly metrics" className="overflow-hidden rounded-[8px] border border-[var(--emphasis-border)] bg-[var(--strong-surface)] text-[var(--on-strong)]">
       <div className="border-b border-[var(--dark-line)] px-7 py-5">
         <p className="text-[10px] font-black uppercase text-[var(--lime)]">Deterministic analytics</p>
         <h2 className="font-serif-display mt-2 text-2xl font-medium">Weekly recorded signals</h2>

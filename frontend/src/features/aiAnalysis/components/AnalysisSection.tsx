@@ -20,7 +20,7 @@ export function AnalysisSection({
     positive: "border-t-[var(--green)]",
     caution: "border-t-[var(--rose)]",
     action: "border-t-[var(--orange)]",
-    muted: "border-t-[#9aa3af]",
+    muted: "border-t-[var(--neutral-line)]",
   };
 
   return (

@@ -19,7 +19,7 @@ export function AiAnalysisResult({ analysis }: AiAnalysisResultProps) {
         <div className="rich-text mt-4 text-sm leading-7 text-[var(--ink)]">
           <ReactMarkdown>{analysis.summary}</ReactMarkdown>
         </div>
-        <p className="mt-4 text-sm text-slate-400">
+        <p className="mt-4 text-sm text-[var(--muted)]">
           Saved {formatDateTimeString(analysis.generatedAt)}. AI interpretation remains separate from measured facts.
         </p>
       </section>

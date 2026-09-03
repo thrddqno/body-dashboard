@@ -154,7 +154,7 @@ export function DailyLogPage() {
       {error ? <ErrorState message={error} /> : null}
       {!isLoading && !error ? (
         <>
-          {saveMessage ? <div aria-live="polite" className="rounded-[8px] border border-[#bdd6c1] bg-[var(--low-bg)] px-4 py-3 text-sm text-[var(--green)]">{saveMessage}</div> : null}
+          {saveMessage ? <div aria-live="polite" className="rounded-[8px] border border-[var(--low-line)] bg-[var(--low-bg)] px-4 py-3 text-sm text-[var(--green)]">{saveMessage}</div> : null}
           <DailyLogForm
             values={values}
             isSubmitting={isSubmitting}

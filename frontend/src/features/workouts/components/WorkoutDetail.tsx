@@ -51,7 +51,7 @@ export function WorkoutDetail({
       <div className="mt-6 space-y-4">
         {workout.exercises.length === 0 ? <p className="text-sm text-[var(--muted)]">No exercise details reported.</p> : null}
         {workout.exercises.map((exercise) => (
-          <div key={exercise.id} className="rounded-[8px] border border-[var(--line)] bg-[var(--paper)] p-5">
+          <div key={exercise.id} className="rounded-[8px] border border-[var(--panel-border)] bg-[var(--paper)] p-5">
             <p className="text-lg font-bold text-[var(--ink)]">{exercise.exerciseName}</p>
             <div className="mt-4 overflow-x-auto">
               {exercise.sets.length === 0 ? <p className="text-sm text-[var(--muted)]">No sets reported.</p> : null}

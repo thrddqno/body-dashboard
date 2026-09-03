@@ -40,7 +40,7 @@ export function ExerciseEditor({
   const hasSets = setCount > 0;
 
   return (
-    <section className="rounded-[8px] border border-[var(--line)] bg-white p-4 sm:p-5">
+    <section className="rounded-[8px] border border-[var(--panel-border)] bg-[var(--card)] p-4 sm:p-5">
       <div className="flex items-end justify-between gap-3">
         <div className="min-w-0 flex-1">
             <label htmlFor={inputId} className="form-label">
@@ -141,11 +141,7 @@ export function ExerciseEditor({
           type="button"
           onClick={onCopyLastSet}
           disabled={!hasSets}
-          className="
-            button-secondary
-            disabled:cursor-not-allowed
-            disabled:opacity-40
-          "
+          className="button-secondary"
         >
           Copy last set
         </button>

@@ -33,6 +33,7 @@ describe("WeeklyCalendar", () => {
 
     expect(selectedDay).toHaveAttribute("aria-pressed", "true");
     expect(selectedDay).not.toHaveClass("-translate-y-1");
+    expect(screen.getByText("Today · Mon")).toBeInTheDocument();
     expect(screen.getByText("No workout reported")).toBeInTheDocument();
     expect(screen.queryByText(/recovery day/i)).not.toBeInTheDocument();
 

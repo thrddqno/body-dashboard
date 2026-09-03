@@ -3,29 +3,105 @@
 :root {
   color-scheme: light;
   font-family: Geist, Arial, Helvetica, sans-serif;
-  color: #111827;
-  background: #f6f7f9;
   --ink: #111827;
   --muted: #5b6472;
   --paper: #f6f7f9;
   --card: #ffffff;
   --line: #d8dde5;
+  --panel-border: var(--line);
+  --control-border: #7d8795;
   --green: #0f5132;
   --lime: #d7f171;
   --orange: #b45309;
   --rose: #b91c1c;
+  --danger: var(--rose);
+  --strong-surface: #111827;
+  --green-surface: #0f5132;
+  --on-strong: #ffffff;
+  --on-lime: #111827;
+  --primary-bg: var(--strong-surface);
+  --primary-copy: var(--on-strong);
+  --primary-hover-bg: var(--green-surface);
+  --nav-active-bg: var(--strong-surface);
+  --nav-active-copy: var(--on-strong);
+  --nav-hover-bg: var(--card);
+  --today-bg: var(--strong-surface);
+  --today-border: var(--strong-surface);
+  --selected-border: var(--strong-surface);
+  --hover-surface: #eef2ef;
+  --emphasis-border: transparent;
+  --green-emphasis-border: transparent;
   --dark-line: #39413d;
   --dark-muted: #abb3ae;
   --green-line: #48745f;
   --green-copy: #c6d5cc;
   --high-bg: #f3ded7;
+  --high-line: #e3b9ae;
   --medium-bg: #f4ead2;
+  --medium-line: #e3c894;
+  --medium-copy: #7a4a13;
   --low-bg: #dfebde;
+  --low-line: #bdd6c1;
+  --neutral-line: #9aa3af;
+  --today-muted: #cbd5e1;
+  --gradient-start: #ffffff;
+  --header-bg: rgba(246, 247, 249, 0.92);
+  --surface-shadow: 0 8px 24px rgba(17, 24, 39, 0.08);
+  --grid-line: var(--line);
+  --live-ring: #dbeadd;
+  --disabled-bg: #d7d3c8;
+  --disabled-border: #7b837e;
+  --disabled-copy: #7b837e;
+  --placeholder: #5b6472;
   --radius: 8px;
+  color: var(--ink);
+  background: var(--paper);
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --ink: #edf2ef;
+  --muted: #aab5ae;
+  --paper: #101512;
+  --card: #19211c;
+  --line: #36423b;
+  --panel-border: #5b6b62;
+  --control-border: #627168;
+  --green: #78c99a;
+  --orange: #f0aa61;
+  --rose: #ff9999;
+  --primary-bg: #78c99a;
+  --primary-copy: #101512;
+  --primary-hover-bg: #d7f171;
+  --nav-active-bg: #d7f171;
+  --nav-active-copy: #111827;
+  --nav-hover-bg: #26332b;
+  --today-bg: #111827;
+  --today-border: #d7f171;
+  --selected-border: #78c99a;
+  --hover-surface: #26332b;
+  --emphasis-border: #66766d;
+  --green-emphasis-border: #78c99a;
+  --high-bg: #3b2525;
+  --high-line: #a96767;
+  --medium-bg: #382f20;
+  --medium-line: #a1844d;
+  --medium-copy: #f0bd75;
+  --low-bg: #20372a;
+  --low-line: #649276;
+  --gradient-start: #172019;
+  --header-bg: rgba(16, 21, 18, 0.92);
+  --surface-shadow: 0 8px 24px rgba(0, 0, 0, 0.32);
+  --grid-line: #526159;
+  --live-ring: #294533;
+  --disabled-bg: #343c37;
+  --disabled-border: #627168;
+  --disabled-copy: #b8c0bb;
+  --placeholder: #7f8b84;
 }
 
 * {
@@ -40,7 +116,7 @@ body {
   min-width: 320px;
   min-height: 100vh;
   margin: 0;
-  background: linear-gradient(180deg, #ffffff 0, var(--paper) 280px);
+  background: linear-gradient(180deg, var(--gradient-start) 0, var(--paper) 280px);
 }
 
 button,
@@ -65,7 +141,7 @@ button {
 
 .panel,
 .subtle-panel {
-  border: 1px solid var(--line);
+  border: 1px solid var(--panel-border);
   border-radius: var(--radius);
   background: var(--card);
   box-shadow: none;
@@ -102,19 +178,19 @@ button {
 }
 
 .button-primary {
-  border: 1px solid var(--ink);
-  background: var(--ink);
-  color: white;
+  border: 1px solid var(--primary-bg);
+  background: var(--primary-bg);
+  color: var(--primary-copy);
   padding: 0.75rem 1rem;
 }
 
 .button-primary:hover {
-  background: var(--green);
-  border-color: var(--green);
+  background: var(--primary-hover-bg);
+  border-color: var(--primary-hover-bg);
 }
 
 .button-secondary {
-  border: 1px solid var(--line);
+  border: 1px solid var(--control-border);
   background: var(--card);
   color: var(--ink);
   padding: 0.7rem 0.9rem;
@@ -125,17 +201,29 @@ button {
   color: var(--green);
 }
 
+.button-on-green {
+  border-color: var(--on-strong);
+  background: var(--on-strong);
+  color: var(--green-surface);
+}
+
+.button-on-green:hover {
+  border-color: var(--lime);
+  background: var(--lime);
+  color: var(--on-lime);
+}
+
 .button-primary:disabled,
 .button-secondary:disabled {
-  border-color: #d7d3c8;
-  background: #d7d3c8;
-  color: #7b837e;
+  border-color: var(--disabled-border);
+  background: var(--disabled-bg);
+  color: var(--disabled-copy);
   cursor: not-allowed;
 }
 
 .form-control {
   width: 100%;
-  border: 1px solid var(--line);
+  border: 1px solid var(--control-border);
   border-radius: var(--radius);
   outline: none;
   background: var(--card);
@@ -181,7 +269,13 @@ button {
   border-color: var(--rose);
 }
 
-.form-control:disabled,
+.form-control:disabled {
+  border-color: var(--disabled-border);
+  background: var(--disabled-bg);
+  color: var(--disabled-copy);
+  cursor: not-allowed;
+}
+
 .form-checkbox:disabled {
   cursor: not-allowed;
   opacity: 0.65;
@@ -194,7 +288,7 @@ button {
 }
 
 .form-control::placeholder {
-  color: #8b94a1;
+  color: var(--placeholder);
 }
 
 .rich-text > :first-child {
@@ -232,7 +326,7 @@ button {
 input:not([type="checkbox"]),
 select,
 textarea {
-  border-color: var(--line);
+  border-color: var(--control-border);
   border-radius: var(--radius);
   background: var(--card);
   color: var(--ink);
@@ -253,42 +347,9 @@ textarea {
   border-radius: var(--radius);
 }
 
-.panel .text-white,
-.panel .text-slate-100,
-.panel .text-slate-200,
-.subtle-panel .text-white,
-.subtle-panel .text-slate-100,
-.subtle-panel .text-slate-200 {
-  color: var(--ink);
-}
-
-.panel .text-slate-300,
-.panel .text-slate-400,
-.panel .text-slate-500,
-.subtle-panel .text-slate-300,
-.subtle-panel .text-slate-400,
-.subtle-panel .text-slate-500 {
-  color: var(--muted);
-}
-
-.panel [class*="text-teal"],
-.subtle-panel [class*="text-teal"] {
-  color: var(--green);
-}
-
-.panel [class*="text-rose"],
-.subtle-panel [class*="text-rose"] {
-  color: var(--rose);
-}
-
-.panel [class*="border-slate"],
-.subtle-panel [class*="border-slate"] {
-  border-color: var(--line);
-}
-
-.panel [class*="bg-slate-950"],
-.subtle-panel [class*="bg-slate-950"] {
-  background: var(--paper);
+.interactive-row:hover {
+  background: var(--hover-surface);
+  box-shadow: inset 3px 0 0 var(--green);
 }
 
 table th {

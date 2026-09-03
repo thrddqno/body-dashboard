@@ -13,10 +13,10 @@ interface DashboardSidePanelsProps {
 }
 
 const verdictStyles: Record<string, string> = {
-  PROGRESS: "bg-[var(--lime)] text-[var(--ink)]",
-  MAINTAIN: "bg-[#f4ead2] text-[#9b6525] border border-[#e3c894]",
-  DELOAD: "bg-[#f3ded7] text-[var(--rose)] border border-[#e3b9ae]",
-  INSUFFICIENT_DATA: "bg-[var(--low-bg)] text-[var(--muted)]",
+  PROGRESS: "bg-[var(--lime)] text-[var(--on-lime)]",
+  MAINTAIN: "bg-[var(--medium-bg)] text-[var(--medium-copy)] border border-[var(--medium-line)]",
+  DELOAD: "bg-[var(--high-bg)] text-[var(--rose)] border border-[var(--high-line)]",
+  INSUFFICIENT_DATA: "border border-[var(--low-line)] bg-[var(--low-bg)] text-[var(--muted)]",
 };
 
 const verdictLabels: Record<string, string> = {
@@ -37,7 +37,7 @@ export function DashboardSidePanels({
 
   return (
     <aside className="space-y-5" aria-label="Progression and targets">
-      <section className="rounded-[8px] bg-[var(--green)] p-8 text-white">
+      <section className="rounded-[8px] border border-[var(--green-emphasis-border)] bg-[var(--green-surface)] p-8 text-[var(--on-strong)]">
         <div className="flex items-center justify-between gap-4">
           <p className="text-[10px] font-black uppercase text-[var(--lime)]">
             Progression
@@ -115,12 +115,12 @@ export function DashboardSidePanels({
               Generate a weekly analysis for coaching on what to change.
             </p>
           )}
-          <Link to="/analysis" className="button-secondary mt-4 inline-flex">
+          <Link to="/analysis" className="button-secondary button-on-green mt-4 inline-flex">
             Open full analysis
           </Link>
         </div>
       </section>
-      <section className="rounded-[8px] bg-[var(--ink)] p-8 text-white">
+      <section className="rounded-[8px] border border-[var(--emphasis-border)] bg-[var(--strong-surface)] p-8 text-[var(--on-strong)]">
         <p className="text-[10px] font-black uppercase text-[var(--lime)]">
           Target
         </p>

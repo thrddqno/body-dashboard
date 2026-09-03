@@ -38,7 +38,7 @@ export function BodyMetricsPanel({ metrics, currentWeightKg }: BodyMetricsPanelP
           helperText="Latest recorded body weight"
         />
         <div className="subtle-panel p-5 md:col-span-2">
-          <p className="text-xs font-medium uppercase tracking-[0.18em] text-slate-500">
+          <p className="text-xs font-medium uppercase tracking-[0.18em] text-[var(--muted)]">
             Recent measurements
           </p>
           {recentMetrics.length === 0 ? (
@@ -58,8 +58,8 @@ export function BodyMetricsPanel({ metrics, currentWeightKg }: BodyMetricsPanelP
             </div>
           ) : (
             <div className="mt-4 overflow-x-auto">
-              <table className="min-w-full text-left text-sm text-slate-300">
-                <thead className="text-xs uppercase tracking-[0.16em] text-slate-500">
+              <table className="min-w-full text-left text-sm text-[var(--ink)]">
+                <thead className="text-xs uppercase tracking-[0.16em] text-[var(--muted)]">
                   <tr>
                     <th className="pb-3 font-medium">Date</th>
                     <th className="pb-3 font-medium">Weight</th>
@@ -69,7 +69,7 @@ export function BodyMetricsPanel({ metrics, currentWeightKg }: BodyMetricsPanelP
                 </thead>
                 <tbody>
                   {recentMetrics.map((metric) => (
-                    <tr key={metric.id} className="border-t border-slate-800">
+                    <tr key={metric.id} className="border-t border-[var(--line)]">
                       <td className="py-3">{formatCompactDateString(metric.date)}</td>
                       <td className="py-3">{formatMetricValue(metric.weightKg, "kg")}</td>
                       <td className="py-3">{formatMetricValue(metric.waistCm, "cm")}</td>

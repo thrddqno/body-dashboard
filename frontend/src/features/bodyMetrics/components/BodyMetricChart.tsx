@@ -27,9 +27,9 @@ interface MetricSeries {
 }
 
 const metricSeries: MetricSeries[] = [
-  { key: "weightKg", label: "Weight", unit: "kg", stroke: "#0f5132" },
-  { key: "waistCm", label: "Waist", unit: "cm", stroke: "#b45309" },
-  { key: "bodyFatPercentage", label: "Body fat", unit: "%", stroke: "#111827" },
+  { key: "weightKg", label: "Weight", unit: "kg", stroke: "var(--green)" },
+  { key: "waistCm", label: "Waist", unit: "cm", stroke: "var(--orange)" },
+  { key: "bodyFatPercentage", label: "Body fat", unit: "%", stroke: "var(--ink)" },
 ];
 
 function formatChartTick(value: number, includeYear: boolean): string {
@@ -78,13 +78,13 @@ export function BodyMetricChart({ metrics }: BodyMetricChartProps) {
                     title={`${series.label} trend`}
                     desc={`${series.label} measurements in ${series.unit}, plotted on their recorded dates. Use arrow keys to inspect data points.`}
                   >
-                    <CartesianGrid stroke="#d8dde5" vertical={false} />
+                    <CartesianGrid stroke="var(--grid-line)" vertical={false} />
                     <XAxis
                       dataKey="timestamp"
                       type="number"
                       scale="time"
                       domain={["dataMin", "dataMax"]}
-                      stroke="#5b6472"
+                      stroke="var(--muted)"
                       tickFormatter={(value) => formatChartTick(Number(value), spansYears)}
                       tickLine={false}
                       axisLine={false}
@@ -92,7 +92,7 @@ export function BodyMetricChart({ metrics }: BodyMetricChartProps) {
                     />
                     <YAxis
                       domain={["auto", "auto"]}
-                      stroke="#5b6472"
+                      stroke="var(--muted)"
                       tickFormatter={(value) => formatDecimal(Number(value))}
                       tickLine={false}
                       axisLine={false}
@@ -102,10 +102,10 @@ export function BodyMetricChart({ metrics }: BodyMetricChartProps) {
                       formatter={(value) => [formatMetricValue(Number(value), series.unit), series.label]}
                       labelFormatter={(value) => formatFullDate(new Date(Number(value)))}
                       contentStyle={{
-                        backgroundColor: "#ffffff",
-                        border: "1px solid #d8dde5",
+                        backgroundColor: "var(--card)",
+                        border: "1px solid var(--control-border)",
                         borderRadius: "8px",
-                        color: "#111827",
+                        color: "var(--ink)",
                       }}
                     />
                     <Line
@@ -122,7 +122,7 @@ export function BodyMetricChart({ metrics }: BodyMetricChartProps) {
                 </ResponsiveContainer>
               </div>
             ) : (
-              <div className="mt-4 grid h-64 place-items-center rounded-[8px] border border-dashed border-[var(--line)] bg-white px-4 text-center text-sm text-[var(--muted)]">
+              <div className="mt-4 grid h-64 place-items-center rounded-[8px] border border-dashed border-[var(--panel-border)] bg-[var(--card)] px-4 text-center text-sm text-[var(--muted)]">
                 No {series.label.toLowerCase()} measurements recorded.
               </div>
             )}

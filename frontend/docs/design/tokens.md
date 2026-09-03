@@ -6,15 +6,40 @@ Use these tokens to preserve the current Body Dashboard visual language. Values 
 
 | Token | Value | Use |
 |---|---:|---|
-| `--ink` | `#111827` | Primary text, dark metric panel, target card, primary buttons |
+| `--ink` | `#111827` | Primary adaptive text and neutral foreground details |
 | `--muted` | `#5b6472` | Secondary text, descriptions, metadata |
 | `--paper` | `#f6f7f9` | Page background and light topbar base |
 | `--card` | `#ffffff` | Calendar cards and light panels |
-| `--line` | `#d8dde5` | Borders, dividers, row rules |
-| `--green` | `#0f5132` | Brand, training status, weekly summary/gate panels |
+| `--line` | `#d8dde5` | Non-interactive dividers and row rules |
+| `--green` | `#0f5132` | Green foreground and training status; becomes lighter in dark mode |
 | `--lime` | `#d7f171` | Accent on dark green/ink surfaces |
 | `--orange` | `#b45309` | Optional/caution status, date accents |
 | `--rose` | `#b91c1c` | High-priority warning text |
+
+In dark mode, `--ink`, `--muted`, `--paper`, `--card`, `--line`, and semantic foreground/status tokens switch to contrast-safe dark-theme values. Use `--strong-surface`, `--green-surface`, `--on-strong`, and `--on-lime` for fixed emphasis surfaces instead of using adaptive foreground tokens as backgrounds. Interactive controls use separate role-based tokens so their boundaries and states remain distinguishable from dark cards and paper.
+
+| Fixed token | Value | Use |
+|---|---:|---|
+| `--strong-surface` | `#111827` | Summary strip and target card |
+| `--green-surface` | `#0f5132` | Brand and progression emphasis panels |
+| `--on-strong` | `#ffffff` | Text on strong and green surfaces |
+| `--on-lime` | `#111827` | Text on lime accents |
+
+## Interactive Color Tokens
+
+| Token | Use |
+|---|---|
+| `--control-border` | Button, input, select, menu, and interactive-card boundaries |
+| `--primary-bg` / `--primary-copy` | Primary action fill and text |
+| `--primary-hover-bg` | Primary action hover fill |
+| `--nav-active-bg` / `--nav-active-copy` | Current navigation item |
+| `--nav-hover-bg` | Navigation hover surface |
+| `--today-bg` / `--today-border` | Current calendar day surface and outline |
+| `--selected-border` | Selected and hovered calendar state |
+| `--hover-surface` | Interactive row hover fill |
+| `--disabled-bg` / `--disabled-border` / `--disabled-copy` | Disabled controls without stacked opacity |
+
+Dark interactive boundaries and state indicators target at least `3:1` contrast against adjacent surfaces. Dark primary actions use the brighter green accent with dark copy; active navigation uses lime with ink copy.
 
 ## Supporting Colors
 
@@ -31,7 +56,7 @@ Use these tokens to preserve the current Body Dashboard visual language. Values 
 | `#cbd5e1` | Muted text on today's dark calendar card |
 | `#f3ded7` | High-priority badge background |
 | `#f4ead2` | Medium-priority badge background |
-| `#9b6525` | Medium-priority badge text |
+| `#7a4a13` | Medium-priority badge text |
 | `#dfebde` | Low-priority badge and logged badge background |
 | `#48745f` | Internal borders on green cards |
 | `#c6d5cc` | Body copy on green cards |

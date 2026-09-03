@@ -186,12 +186,12 @@ export function WorkoutForm({
         </div>
 
         {workoutType === "REST" ? (
-          <div className="mt-5 rounded-[8px] border border-[var(--line)] bg-[var(--paper)] p-4">
+          <div className="mt-5 rounded-[8px] border border-[var(--panel-border)] bg-[var(--paper)] p-4">
             <p className="font-bold text-[var(--green)]">Scheduled recovery day</p>
             <p className="mt-1 text-sm leading-6 text-[var(--muted)]">This record will be saved without exercises and excluded from workout totals and adherence.</p>
           </div>
         ) : exercises.length === 0 ? (
-          <div className="mt-5 rounded-[8px] border border-dashed border-[var(--line)] bg-[var(--paper)] p-4 text-sm text-[var(--muted)]">
+          <div className="mt-5 rounded-[8px] border border-dashed border-[var(--panel-border)] bg-[var(--paper)] p-4 text-sm text-[var(--muted)]">
             No exercises added. You can save this workout as-is.
           </div>
         ) : null}

@@ -10,7 +10,7 @@ export function ErrorState({
   action,
 }: ErrorStateProps) {
   return (
-    <div className="rounded-[8px] border border-[#e3b9ae] bg-[#f3ded7] p-6 text-sm text-[var(--rose)]">
+    <div className="rounded-[8px] border border-[var(--high-line)] bg-[var(--high-bg)] p-6 text-sm text-[var(--rose)]">
       <p className="font-semibold">{title}</p>
       <p className="mt-2 opacity-85">{message}</p>
       {action ? <div className="mt-4">{action}</div> : null}

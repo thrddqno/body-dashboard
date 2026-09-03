@@ -7,9 +7,9 @@ interface StatusBadgeProps {
 }
 
 const statusClasses: Record<WorkoutStatus, string> = {
-  PLANNED: "border-[#e3c894] bg-[#f4ead2] text-[#9b6525]",
-  COMPLETED: "border-[#bdd6c1] bg-[#dfebde] text-[var(--green)]",
-  MISSED: "border-[#e3b9ae] bg-[#f3ded7] text-[var(--rose)]",
+  PLANNED: "border-[var(--medium-line)] bg-[var(--medium-bg)] text-[var(--medium-copy)]",
+  COMPLETED: "border-[var(--low-line)] bg-[var(--low-bg)] text-[var(--green)]",
+  MISSED: "border-[var(--high-line)] bg-[var(--high-bg)] text-[var(--rose)]",
 };
 
 export function StatusBadge({ status }: StatusBadgeProps) {

@@ -20,6 +20,8 @@ The design combines a quiet paper workspace with serious training signals:
 - Serif display type for decisive headlines and numeric emphasis.
 - Sans type for dashboard labels, notes, and controls.
 
+The workspace supports light and dark themes. Dark mode shifts paper, cards, text, rules, controls, and charts to low-glare equivalents while preserving the fixed dark ink and deep-green emphasis panels. Interactive boundaries and selected states maintain at least 3:1 contrast against adjacent surfaces. The selected theme follows the system preference on first visit and is persisted after the user changes it.
+
 Avoid making the dashboard louder or more decorative than the data. The design works because it is restrained and easy to scan.
 
 ## Page Structure
@@ -63,7 +65,7 @@ The first viewport should show the real dashboard state, not a marketing introdu
 
 ### Topbar
 
-The topbar is sticky, 68px tall, translucent paper, and separated with a 1px rule. The brand mark is a 34px square in deep green with lime serif "M". Keep the mark compact and functional.
+The topbar is sticky, 68px tall, translucent paper, and separated with a 1px rule. The brand mark is a 34px square in deep green with lime serif "M". Keep the mark compact and functional. The light/dark toggle remains visible at desktop and mobile sizes.
 
 ### Hero
 
@@ -82,6 +84,8 @@ Calendar cards are real buttons. They show weekday, date, program, and a short d
 - `optional`: orange top border.
 - `today`: dark card with lime program label.
 - `selected`: dark border and elevated shadow.
+
+In dark mode, today also has a lime inset outline and an explicit `Today` label. Selected non-today cards use a green ring so neither state depends on a near-black fill alone.
 
 The selected plan panel uses the same card language and divides content into warm-up, main plan, finisher, and guardrails.
 

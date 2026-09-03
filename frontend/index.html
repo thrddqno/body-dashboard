@@ -7,6 +7,30 @@
       name="description"
       content="Body Dashboard is a personal fitness tracking and analysis application."
     />
+    <script>
+      (() => {
+        const storageKey = "body-dashboard-theme";
+        let theme;
+
+        try {
+          const storedTheme = localStorage.getItem(storageKey);
+          if (storedTheme === "light" || storedTheme === "dark") {
+            theme = storedTheme;
+          }
+        } catch {
+          // Storage can be unavailable in privacy-restricted browser contexts.
+        }
+
+        if (!theme) {
+          theme = window.matchMedia("(prefers-color-scheme: dark)").matches
+            ? "dark"
+            : "light";
+        }
+
+        document.documentElement.dataset.theme = theme;
+        document.documentElement.style.colorScheme = theme;
+      })();
+    </script>
     <title>Body Dashboard</title>
   </head>
   <body>
