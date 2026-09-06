@@ -5,9 +5,11 @@ import { DashboardPage } from "@/pages/DashboardPage";
 
 const mocks = vi.hoisted(() => ({
   getDashboard: vi.fn(),
+  getDailyLogsInRange: vi.fn(),
   getLatestWeeklyAiAnalysis: vi.fn(),
   getTrainingPlan: vi.fn(),
   getWeeklyAnalytics: vi.fn(),
+  listBodyMetricsInRange: vi.fn(),
   listWorkoutPage: vi.fn(),
   listWorkoutsByDateRange: vi.fn(),
 }));
@@ -22,6 +24,14 @@ vi.mock("@/api/analyticsApi", () => ({
 
 vi.mock("@/api/aiAnalysisApi", () => ({
   getLatestWeeklyAiAnalysis: (...args: unknown[]) => mocks.getLatestWeeklyAiAnalysis(...args),
+}));
+
+vi.mock("@/api/dailyLogsApi", () => ({
+  getDailyLogsInRange: (...args: unknown[]) => mocks.getDailyLogsInRange(...args),
+}));
+
+vi.mock("@/api/bodyMetricsApi", () => ({
+  listBodyMetricsInRange: (...args: unknown[]) => mocks.listBodyMetricsInRange(...args),
 }));
 
 vi.mock("@/api/trainingPlansApi", () => ({
@@ -39,6 +49,7 @@ vi.mock("@/features/dashboard/components/DashboardSidePanels", () => ({ Dashboar
 vi.mock("@/features/dashboard/components/SelectedDayPanel", () => ({ SelectedDayPanel: () => null }));
 vi.mock("@/features/dashboard/components/WeeklyCalendar", () => ({ WeeklyCalendar: () => null }));
 vi.mock("@/features/dashboard/components/WeeklySummary", () => ({ WeeklySummary: () => null }));
+vi.mock("@/features/dashboard/components/WeeklyTrendsChart", () => ({ WeeklyTrendsChart: () => null }));
 
 function workout(id: number) {
   return {
@@ -58,12 +69,31 @@ describe("DashboardPage workout history", () => {
     Object.values(mocks).forEach((mock) => mock.mockReset());
     mocks.getDashboard.mockResolvedValue({
       today: { date: "2026-08-31", dailyLog: null },
-      body: {},
+      body: {
+        currentWeightKg: null,
+        activeTargetKg: 75,
+        weightRemainingKg: null,
+        goal: {
+          baselineDate: "2026-08-03",
+          baselineWeightKg: 80,
+          stage1TargetKg: 75,
+          stage2MinKg: 72,
+          stage2MaxKg: 75,
+          calorieTargetKcal: 2000,
+          estimatedMaintenanceMinKcal: 2400,
+          estimatedMaintenanceMaxKcal: 2600,
+          minWeightLossKgPerWeek: 0.3,
+          maxWeightLossKgPerWeek: 0.7,
+        },
+        recentMetrics: [],
+      },
       training: {},
     });
     mocks.getWeeklyAnalytics.mockResolvedValue({
       period: { start: "2026-08-31", end: "2026-09-06" },
     });
+    mocks.getDailyLogsInRange.mockResolvedValue([]);
+    mocks.listBodyMetricsInRange.mockResolvedValue([]);
     mocks.getLatestWeeklyAiAnalysis.mockResolvedValue(null);
     mocks.getTrainingPlan.mockResolvedValue({
       date: "2026-08-31",

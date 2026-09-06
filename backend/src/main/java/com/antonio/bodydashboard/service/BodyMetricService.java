@@ -1,5 +1,6 @@
 package com.antonio.bodydashboard.service;
 
+import java.time.LocalDate;
 import java.util.List;
 
 import org.springframework.dao.DataIntegrityViolationException;
@@ -48,6 +49,14 @@ public class BodyMetricService {
 	@Transactional(readOnly = true)
 	public List<BodyMetricResponse> getAll() {
 		return bodyMetricRepository.findAllByOrderByDateDesc()
+				.stream()
+				.map(this::toResponse)
+				.toList();
+	}
+
+	@Transactional(readOnly = true)
+	public List<BodyMetricResponse> getBetween(LocalDate start, LocalDate end) {
+		return bodyMetricRepository.findByDateBetweenOrderByDateAsc(start, end)
 				.stream()
 				.map(this::toResponse)
 				.toList();

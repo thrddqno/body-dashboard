@@ -1,6 +1,7 @@
 package com.antonio.bodydashboard.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.hasSize;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -207,6 +208,23 @@ class DailyLogControllerTests {
 				.andExpect(jsonPath("$.recoveryNotes").value("Better activity"));
 
 		assertThat(dailyLogRepository.count()).isEqualTo(1);
+	}
+
+	@Test
+	void listsDailyLogsWithinDateRangeOrderedAscending() throws Exception {
+		saveDailyLog(LocalDate.of(2026, 8, 30), 420, 5200, EnergyLevel.AVERAGE);
+		DailyLog mid = saveDailyLog(LocalDate.of(2026, 8, 31), 360, 6000, EnergyLevel.HIGH);
+		saveDailyLog(LocalDate.of(2026, 9, 1), 450, 8000, EnergyLevel.VERY_HIGH);
+		saveDailyLog(LocalDate.of(2026, 9, 2), 300, 4000, EnergyLevel.LOW);
+
+		mockMvc.perform(get("/api/daily-logs")
+					.param("from", "2026-08-31")
+					.param("to", "2026-09-01"))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$", hasSize(2)))
+				.andExpect(jsonPath("$[0].date").value("2026-08-31"))
+				.andExpect(jsonPath("$[0].id").value(mid.getId()))
+				.andExpect(jsonPath("$[1].date").value("2026-09-01"));
 	}
 
 	private DailyLog saveDailyLog(LocalDate date, Integer sleepMinutes, Integer steps, EnergyLevel energy) {

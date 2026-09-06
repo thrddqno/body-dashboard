@@ -6,6 +6,8 @@ import { getDashboard } from "@/api/dashboardApi";
 import { ApiError } from "@/api/httpClient";
 import { listWorkoutPage, listWorkoutsByDateRange } from "@/api/workoutsApi";
 import { getTrainingPlan } from "@/api/trainingPlansApi";
+import { getDailyLogsInRange } from "@/api/dailyLogsApi";
+import { listBodyMetricsInRange } from "@/api/bodyMetricsApi";
 import { ErrorState } from "@/components/ErrorState";
 import { LoadingState } from "@/components/LoadingState";
 import { CoachNotes } from "@/features/dashboard/components/CoachNotes";
@@ -14,10 +16,13 @@ import { DashboardHeader } from "@/features/dashboard/components/DashboardHeader
 import { SelectedDayPanel } from "@/features/dashboard/components/SelectedDayPanel";
 import { WeeklyCalendar } from "@/features/dashboard/components/WeeklyCalendar";
 import { WeeklySummary } from "@/features/dashboard/components/WeeklySummary";
+import { WeeklyTrendsChart } from "@/features/dashboard/components/WeeklyTrendsChart";
 import { WorkoutLog } from "@/features/dashboard/components/WorkoutLog";
 import type { WeeklyAnalytics } from "@/types/analytics";
 import type { WeeklyAiAnalysis } from "@/types/aiAnalysis";
 import type { DashboardResponse } from "@/types/dashboard";
+import type { DailyLog } from "@/types/dailyLog";
+import type { BodyMetric } from "@/types/bodyMetric";
 import type { Workout } from "@/types/workout";
 import type { TrainingPlan } from "@/types/plannedWorkout";
 import { getWeekDates } from "@/utils/dates";
@@ -27,6 +32,8 @@ export function DashboardPage() {
   const [dashboard, setDashboard] = useState<DashboardResponse | null>(null);
   const [analytics, setAnalytics] = useState<WeeklyAnalytics | null>(null);
   const [workouts, setWorkouts] = useState<Workout[]>([]);
+  const [dailyLogs, setDailyLogs] = useState<DailyLog[]>([]);
+  const [bodyMetrics, setBodyMetrics] = useState<BodyMetric[]>([]);
   const [workoutHistory, setWorkoutHistory] = useState<Workout[]>([]);
   const [workoutHistoryPage, setWorkoutHistoryPage] = useState(0);
   const [workoutHistoryPageSize, setWorkoutHistoryPageSize] = useState(7);
@@ -56,15 +63,29 @@ export function DashboardPage() {
           getDashboard(controller.signal),
           getWeeklyAnalytics(controller.signal),
         ]);
-        const workoutsResponse = await listWorkoutsByDateRange(
-          analyticsResponse.period.start,
-          analyticsResponse.period.end,
-          controller.signal,
-        );
+        const [workoutsResponse, weeklyDailyLogs, weeklyBodyMetrics] = await Promise.all([
+          listWorkoutsByDateRange(
+            analyticsResponse.period.start,
+            analyticsResponse.period.end,
+            controller.signal,
+          ),
+          getDailyLogsInRange(
+            analyticsResponse.period.start,
+            analyticsResponse.period.end,
+            controller.signal,
+          ),
+          listBodyMetricsInRange(
+            analyticsResponse.period.start,
+            analyticsResponse.period.end,
+            controller.signal,
+          ),
+        ]);
 
         setDashboard(dashboardResponse);
         setAnalytics(analyticsResponse);
         setWorkouts(workoutsResponse);
+        setDailyLogs(weeklyDailyLogs);
+        setBodyMetrics(weeklyBodyMetrics);
         setSelectedDate(dashboardResponse.today.date);
       } catch (loadError) {
         if (loadError instanceof Error && loadError.name === "AbortError") {
@@ -186,13 +207,24 @@ export function DashboardPage() {
     <main>
       <DashboardHeader today={dashboard.today.date} periodLabel={periodLabel} />
       <WeeklySummary analytics={analytics} />
-      <WeeklyCalendar
-        dates={weekDates}
-        today={dashboard.today.date}
-        workoutsByDate={workoutsByDate}
-        selectedDate={selectedDate}
-        onSelectDate={setSelectedDate}
-      />
+      <div className="mt-6">
+        <WeeklyTrendsChart
+          dailyLogs={dailyLogs}
+          bodyMetrics={bodyMetrics}
+          periodStart={analytics.period.start}
+          periodEnd={analytics.period.end}
+          calorieBaselineKcal={dashboard.body.goal.calorieTargetKcal}
+        />
+      </div>
+      <div className="mt-6">
+        <WeeklyCalendar
+          dates={weekDates}
+          today={dashboard.today.date}
+          workoutsByDate={workoutsByDate}
+          selectedDate={selectedDate}
+          onSelectDate={setSelectedDate}
+        />
+      </div>
       <div className="mt-6">
         <SelectedDayPanel
           selectedDate={selectedDate}

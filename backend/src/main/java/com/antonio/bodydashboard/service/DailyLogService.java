@@ -1,6 +1,7 @@
 package com.antonio.bodydashboard.service;
 
 import java.time.LocalDate;
+import java.util.List;
 
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
@@ -31,6 +32,14 @@ public class DailyLogService {
 		return dailyLogRepository.findByDate(date)
 				.map(this::toResponse)
 				.orElseThrow(() -> new DailyLogNotFoundException(date));
+	}
+
+	@Transactional(readOnly = true)
+	public List<DailyLogResponse> getBetween(LocalDate start, LocalDate end) {
+		return dailyLogRepository.findByDateBetweenOrderByDateAsc(start, end)
+				.stream()
+				.map(this::toResponse)
+				.toList();
 	}
 
 	public DailyLogResponse upsert(LocalDate date, DailyLogRequest request) {

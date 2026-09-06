@@ -144,6 +144,22 @@ class BodyMetricControllerTests {
 	}
 
 	@Test
+	void returnsBodyMetricsWithinDateRangeOrderedAscending() throws Exception {
+		saveBodyMetric(LocalDate.of(2026, 8, 28), "112.00");
+		saveBodyMetric(LocalDate.of(2026, 8, 29), "111.90");
+		saveBodyMetric(LocalDate.of(2026, 8, 30), "111.75");
+		saveBodyMetric(LocalDate.of(2026, 8, 31), "111.60");
+
+		mockMvc.perform(get("/api/body-metrics")
+					.param("from", "2026-08-29")
+					.param("to", "2026-08-30"))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$", hasSize(2)))
+				.andExpect(jsonPath("$[0].date").value("2026-08-29"))
+				.andExpect(jsonPath("$[1].date").value("2026-08-30"));
+	}
+
+	@Test
 	void returnsOneBodyMetric() throws Exception {
 		BodyMetric bodyMetric = saveBodyMetric(LocalDate.of(2026, 8, 30), "111.75");
 
