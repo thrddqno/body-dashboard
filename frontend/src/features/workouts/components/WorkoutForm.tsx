@@ -26,7 +26,7 @@ interface WorkoutFormProps {
   onDateChange?: (date: string) => void;
 }
 
-const workoutTypes = ["PUSH", "PULL", "LEGS", "REST", "UPPER", "LOWER"] as const;
+const workoutTypes = ["PUSH", "PULL", "LEGS", "REST", "UPPER", "LOWER", "FULLBODY"] as const;
 type ScheduledWorkoutType = (typeof workoutTypes)[number];
 
 function createSet(): SetFormValue {

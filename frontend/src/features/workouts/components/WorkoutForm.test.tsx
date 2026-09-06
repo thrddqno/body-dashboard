@@ -55,6 +55,28 @@ describe("WorkoutForm", () => {
     });
   });
 
+  it("submits a FULLBODY workout type", async () => {
+    const onSubmit = vi.fn().mockResolvedValue(true);
+
+    render(
+      <WorkoutForm
+        initialDate="2026-09-02"
+        isSubmitting={false}
+        fieldErrors={{}}
+        onSubmit={onSubmit}
+      />,
+    );
+
+    fireEvent.change(screen.getByLabelText("Workout type"), { target: { value: "FULLBODY" } });
+    fireEvent.click(screen.getByRole("button", { name: "Save workout" }));
+
+    await waitFor(() =>
+      expect(onSubmit).toHaveBeenCalledWith(
+        expect.objectContaining({ workoutType: "FULLBODY", exercises: [] }),
+      ),
+    );
+  });
+
   it("uses backend schedule updates by date while allowing a dropdown override", () => {
     const onDateChange = vi.fn();
     const { rerender } = render(

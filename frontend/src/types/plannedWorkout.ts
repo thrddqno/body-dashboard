@@ -20,5 +20,5 @@ export interface PlannedWorkout {
 export interface TrainingPlan extends PlannedWorkout {
   date: string;
   dayOfWeek: string;
-  workoutType: "PUSH" | "PULL" | "LEGS" | "REST" | "UPPER" | "LOWER";
+  workoutType: "PUSH" | "PULL" | "LEGS" | "REST" | "UPPER" | "LOWER" | "FULLBODY";
 }

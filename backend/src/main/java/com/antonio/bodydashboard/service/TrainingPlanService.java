@@ -37,7 +37,7 @@ public class TrainingPlanService {
 			throw new IllegalArgumentException("Training plan date is required");
 		}
 
-		Optional<TrainingPlan> scheduledPlan = repository.findById(date.getDayOfWeek());
+		Optional<TrainingPlan> scheduledPlan = repository.findByDayOfWeek(date.getDayOfWeek());
 		if (workoutType == null || workoutType.isBlank()) {
 			return scheduledPlan.map(plan -> toResponse(date, plan));
 		}

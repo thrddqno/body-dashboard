@@ -48,6 +48,20 @@ class TrainingPlanControllerTests {
 	}
 
 	@Test
+	void returnsFullBodyTemplateForRequestedWorkoutType() throws Exception {
+		mockMvc.perform(get("/api/training-plans/2026-09-02").queryParam("workoutType", "fullbody"))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.date").value("2026-09-02"))
+				.andExpect(jsonPath("$.workoutType").value("FULLBODY"))
+				.andExpect(jsonPath("$.type").value("workout"))
+				.andExpect(jsonPath("$.title").value("Full Body"))
+				.andExpect(jsonPath("$.subtitle").value("Consolidated push, pull, legs, and core"))
+				.andExpect(jsonPath("$.exercises", hasSize(9)))
+				.andExpect(jsonPath("$.exercises[0].name").value("Leg Press"))
+				.andExpect(jsonPath("$.exercises[0].sets").value(3));
+	}
+
+	@Test
 	void returnsNotFoundForUnknownWorkoutType() throws Exception {
 		mockMvc.perform(get("/api/training-plans/2026-09-01").queryParam("workoutType", "UNKNOWN"))
 				.andExpect(status().isNotFound());

@@ -40,10 +40,10 @@ describe("trainingPlansApi", () => {
       }),
     );
 
-    await getTrainingPlan("2026-09-01", undefined, "UPPER");
+    await getTrainingPlan("2026-09-01", undefined, "FULLBODY");
 
     expect(fetchMock).toHaveBeenCalledWith(
-      "/api/training-plans/2026-09-01?workoutType=UPPER",
+      "/api/training-plans/2026-09-01?workoutType=FULLBODY",
       expect.objectContaining({ headers: expect.any(Headers) }),
     );
   });
