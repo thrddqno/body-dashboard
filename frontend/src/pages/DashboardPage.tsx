@@ -44,6 +44,7 @@ export function DashboardPage() {
   const [workoutHistoryRequest, setWorkoutHistoryRequest] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string>();
+  const [trendsError, setTrendsError] = useState<string>();
   const [selectedDate, setSelectedDate] = useState<string>("");
   const [latestAnalysis, setLatestAnalysis] = useState<WeeklyAiAnalysis | null>(null);
   const [isAnalysisLoading, setIsAnalysisLoading] = useState(true);
@@ -57,13 +58,21 @@ export function DashboardPage() {
     async function loadPage() {
       setIsLoading(true);
       setError(undefined);
+      setTrendsError(undefined);
 
       try {
         const [dashboardResponse, analyticsResponse] = await Promise.all([
           getDashboard(controller.signal),
           getWeeklyAnalytics(controller.signal),
         ]);
-        const [workoutsResponse, weeklyDailyLogs, weeklyBodyMetrics] = await Promise.all([
+
+        setDashboard(dashboardResponse);
+        setAnalytics(analyticsResponse);
+        setSelectedDate(dashboardResponse.today.date);
+
+        if (controller.signal.aborted) return;
+
+        const [workoutsForWeek, weeklyDailyLogs, weeklyBodyMetrics] = await Promise.all([
           listWorkoutsByDateRange(
             analyticsResponse.period.start,
             analyticsResponse.period.end,
@@ -79,14 +88,14 @@ export function DashboardPage() {
             analyticsResponse.period.end,
             controller.signal,
           ),
-        ]);
+        ]).catch(() => {
+          setTrendsError("Weekly trends are temporarily unavailable.");
+          return [[], [], []] as [Workout[], DailyLog[], BodyMetric[]];
+        });
 
-        setDashboard(dashboardResponse);
-        setAnalytics(analyticsResponse);
-        setWorkouts(workoutsResponse);
+        setWorkouts(workoutsForWeek);
         setDailyLogs(weeklyDailyLogs);
         setBodyMetrics(weeklyBodyMetrics);
-        setSelectedDate(dashboardResponse.today.date);
       } catch (loadError) {
         if (loadError instanceof Error && loadError.name === "AbortError") {
           return;
@@ -214,6 +223,7 @@ export function DashboardPage() {
           periodStart={analytics.period.start}
           periodEnd={analytics.period.end}
           calorieBaselineKcal={dashboard.body.goal.calorieTargetKcal}
+          error={trendsError}
         />
       </div>
       <div className="mt-6">

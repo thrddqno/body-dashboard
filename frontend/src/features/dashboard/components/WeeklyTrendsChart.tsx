@@ -24,6 +24,7 @@ interface WeeklyTrendsChartProps {
   periodStart: string;
   periodEnd: string;
   calorieBaselineKcal: number;
+  error?: string;
 }
 
 type AxisBound = number | "auto";
@@ -86,7 +87,17 @@ export function WeeklyTrendsChart({
   periodStart,
   periodEnd,
   calorieBaselineKcal,
+  error,
 }: WeeklyTrendsChartProps) {
+  if (error) {
+    return (
+      <div className="subtle-panel p-6 text-center">
+        <p className="text-sm font-bold text-[var(--ink)]">Weekly trends are temporarily unavailable</p>
+        <p className="mt-2 text-sm leading-6 text-[var(--muted)]">{error}</p>
+      </div>
+    );
+  }
+
   if (dailyLogs.length === 0 && bodyMetrics.length === 0) {
     return (
       <EmptyState
@@ -347,7 +358,7 @@ function CalorieBarChartTrend({ rows, yDomain, baseline, unit, label }: CalorieB
               dataKey="caloriesWithinTarget"
               name={`Calories vs ${baseline} ${unit} target`}
               fill="var(--green)"
-              shape={(props) => <CalorieBarShape {...props} baseline={baseline} />}
+              shape={(props) => <CalorieBarShape {...props} />}
             />
           </BarChart>
         </ResponsiveContainer>
@@ -381,11 +392,9 @@ interface CalorieBarShapeProps {
   width?: number;
   height?: number;
   payload?: ChartRow;
-  baseline: number;
 }
 
-function CalorieBarShape({ x, y, width, height, payload, baseline }: CalorieBarShapeProps) {
-  const within = (payload?.caloriesWithinTarget as number | null) ?? 0;
+function CalorieBarShape({ x, y, width, height, payload }: CalorieBarShapeProps) {
   const surplus = (payload?.caloriesSurplus as number | null) ?? 0;
   const barWidth = typeof width === "number" ? width : 0;
 

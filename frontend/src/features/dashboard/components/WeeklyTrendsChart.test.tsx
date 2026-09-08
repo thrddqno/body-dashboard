@@ -246,4 +246,21 @@ describe("WeeklyTrendsChart", () => {
     expect(screen.getByText("No weekly trends data")).toBeInTheDocument();
     expect(screen.queryByRole("img")).not.toBeInTheDocument();
   });
+
+  it("shows an unavailable message instead of charts when the trend data failed to load", () => {
+    render(
+      <WeeklyTrendsChart
+        dailyLogs={[]}
+        bodyMetrics={[]}
+        periodStart={periodStart}
+        periodEnd={periodEnd}
+        calorieBaselineKcal={calorieBaselineKcal}
+        error="Weekly trends are temporarily unavailable."
+      />,
+    );
+
+    expect(screen.getByText("Weekly trends are temporarily unavailable")).toBeInTheDocument();
+    expect(screen.getByText("Weekly trends are temporarily unavailable.")).toBeInTheDocument();
+    expect(screen.queryByRole("img")).not.toBeInTheDocument();
+  });
 });

@@ -49,7 +49,10 @@ vi.mock("@/features/dashboard/components/DashboardSidePanels", () => ({ Dashboar
 vi.mock("@/features/dashboard/components/SelectedDayPanel", () => ({ SelectedDayPanel: () => null }));
 vi.mock("@/features/dashboard/components/WeeklyCalendar", () => ({ WeeklyCalendar: () => null }));
 vi.mock("@/features/dashboard/components/WeeklySummary", () => ({ WeeklySummary: () => null }));
-vi.mock("@/features/dashboard/components/WeeklyTrendsChart", () => ({ WeeklyTrendsChart: () => null }));
+vi.mock("@/features/dashboard/components/WeeklyTrendsChart", () => ({
+  WeeklyTrendsChart: ({ error }: { error?: string }) =>
+    error ? <div>Weekly trends are temporarily unavailable</div> : null,
+}));
 
 function workout(id: number) {
   return {
@@ -157,5 +160,23 @@ describe("DashboardPage workout history", () => {
 
     await waitFor(() => expect(mocks.listWorkoutPage).toHaveBeenCalledTimes(2));
     expect(await screen.findByText("No workouts reported.")).toBeInTheDocument();
+  });
+
+  it("renders the dashboard when weekly trend requests fail", async () => {
+    mocks.getDailyLogsInRange.mockRejectedValue(new Error("Trends unavailable"));
+    mocks.listBodyMetricsInRange.mockRejectedValue(new Error("Trends unavailable"));
+    mocks.listWorkoutsByDateRange.mockRejectedValue(new Error("Trends unavailable"));
+
+    render(
+      <MemoryRouter>
+        <DashboardPage />
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findByText("Page 1 of 3 · 18 workouts")).toBeInTheDocument();
+    expect(
+      await screen.findByText("Weekly trends are temporarily unavailable"),
+    ).toBeInTheDocument();
+    expect(mocks.getDashboard).toHaveBeenCalledTimes(1);
   });
 });
