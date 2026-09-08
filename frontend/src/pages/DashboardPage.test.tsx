@@ -79,7 +79,7 @@ describe("DashboardPage workout history", () => {
           stage1TargetKg: 75,
           stage2MinKg: 72,
           stage2MaxKg: 75,
-          calorieTargetKcal: 2000,
+          calorieTargetKcal: 2500,
           estimatedMaintenanceMinKcal: 2400,
           estimatedMaintenanceMaxKcal: 2600,
           minWeightLossKgPerWeek: 0.3,

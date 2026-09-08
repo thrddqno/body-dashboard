@@ -67,7 +67,7 @@ vi.mock("recharts", () => ({
 
 const periodStart = "2026-08-31";
 const periodEnd = "2026-09-06";
-const calorieBaselineKcal = 2000;
+const calorieBaselineKcal = 2500;
 
 function dailyLog(overrides: Partial<DailyLog>): DailyLog {
   return {
@@ -103,8 +103,8 @@ describe("WeeklyTrendsChart", () => {
     render(
       <WeeklyTrendsChart
         dailyLogs={[
-          dailyLog({ date: "2026-08-31", sleepMinutes: 480 }),
-          dailyLog({ date: "2026-09-02", sleepMinutes: 360, steps: 6400 }),
+          dailyLog({ date: "2026-08-31", sleepMinutes: 480, estimatedCalories: 2450 }),
+          dailyLog({ date: "2026-09-02", sleepMinutes: 360, steps: 6400, estimatedCalories: 2700 }),
         ]}
         bodyMetrics={[bodyMetric({ date: "2026-09-01", weightKg: 79.2 })]}
         periodStart={periodStart}
@@ -147,18 +147,36 @@ describe("WeeklyTrendsChart", () => {
     expect(weightRows.find((row) => row.date === "2026-09-01")?.weightKg).toBe(79.2);
     expect(weightRows.find((row) => row.date === "2026-08-31")?.weightKg).toBeNull();
 
+    const caloriesChart = screen.getByRole("img", { name: "Weekly Calories trend" });
+    const caloriesRows = JSON.parse(caloriesChart.getAttribute("data-values") ?? "") as Array<{
+      date: string;
+      caloriesWithinTarget: number | null;
+      caloriesSurplus: number | null;
+    }>;
+    expect(caloriesRows.find((row) => row.date === "2026-08-31")).toMatchObject({
+      caloriesWithinTarget: 2450,
+      caloriesSurplus: 0,
+    });
+    expect(caloriesRows.find((row) => row.date === "2026-09-02")).toMatchObject({
+      caloriesWithinTarget: 2500,
+      caloriesSurplus: 200,
+    });
+
     expect(screen.getAllByTestId("trend-bar").map((bar) => bar.textContent)).toEqual([
       "Sleep (sleepHours)",
       "Steps (steps)",
-      "Calories (estimatedCalories)",
+      "Calories vs 2500 kcal target (caloriesWithinTarget)",
     ]);
     expect(screen.getAllByTestId("trend-line").map((line) => line.textContent)).toEqual(["Weight (weightKg)"]);
   });
 
-  it("uses a 0-24 scale for sleep and anchors calories to the baseline", () => {
+  it("caps calories at a fixed scale and reports surplus as a not-to-scale cap", () => {
     render(
       <WeeklyTrendsChart
-        dailyLogs={[dailyLog({ date: "2026-08-31", estimatedCalories: 2450 })]}
+        dailyLogs={[
+          dailyLog({ date: "2026-08-31", estimatedCalories: 2450 }),
+          dailyLog({ date: "2026-09-02", estimatedCalories: 2700 }),
+        ]}
         bodyMetrics={[bodyMetric({ date: "2026-09-01" })]}
         periodStart={periodStart}
         periodEnd={periodEnd}
@@ -168,22 +186,32 @@ describe("WeeklyTrendsChart", () => {
 
     expect(
       within(screen.getByRole("img", { name: "Weekly Sleep trend" })).getByTestId("y-axis"),
-    ).toHaveAttribute("data-domain", "0,24");
+    ).toHaveAttribute("data-domain", "0,12");
 
     const stepsAxis = within(screen.getByRole("img", { name: "Weekly Steps trend" })).getByTestId("y-axis");
     expect(stepsAxis).toHaveAttribute("data-domain", "auto,auto");
 
     const caloriesChart = screen.getByRole("img", { name: "Weekly Calories trend" });
+    expect(within(caloriesChart).getByTestId("y-axis")).toHaveAttribute("data-domain", "0,2500");
+    const calorieDesc = caloriesChart.getAttribute("data-description") ?? "";
+    expect(calorieDesc).toContain("fixed 2500 kcal target");
+
     const caloriesRows = JSON.parse(caloriesChart.getAttribute("data-values") ?? "") as Array<{
       date: string;
-      estimatedCalories: number | null;
+      caloriesWithinTarget: number | null;
+      caloriesSurplus: number | null;
     }>;
-    expect(caloriesRows.find((row) => row.date === "2026-08-31")?.estimatedCalories).toBe(450);
-    expect(caloriesRows.find((row) => row.date === "2026-09-01")?.estimatedCalories).toBeNull();
-    expect(caloriesChart).toHaveAttribute(
-      "data-description",
-      "Calories relative to the 2000 kcal baseline, per recorded day this week.",
-    );
+    expect(caloriesRows.find((row) => row.date === "2026-08-31")).toMatchObject({
+      caloriesWithinTarget: 2450,
+      caloriesSurplus: 0,
+    });
+    expect(caloriesRows.find((row) => row.date === "2026-09-02")).toMatchObject({
+      caloriesWithinTarget: 2500,
+      caloriesSurplus: 200,
+    });
+
+    expect(screen.getByText(/Green bars are capped at the 2,500 kcal target\./)).toBeInTheDocument();
+    expect(screen.getByText(/Days over target carry an orange cap \(not to scale\)/)).toBeInTheDocument();
   });
 
   it("shows a fallback panel when a metric has no values for the week", () => {

@@ -23,7 +23,7 @@ interface WeeklyTrendsChartProps {
   bodyMetrics: BodyMetric[];
   periodStart: string;
   periodEnd: string;
-  calorieBaselineKcal: number | null;
+  calorieBaselineKcal: number;
 }
 
 type AxisBound = number | "auto";
@@ -44,7 +44,7 @@ const trendSeries: TrendSeries[] = [
     label: "Sleep",
     unit: "h",
     color: "var(--ink)",
-    yDomain: [0, 24],
+    yDomain: [0, 12],
     tooltip: (value) => `${formatDecimal(value)} h`,
     fromDailyLog: (log) => (log.sleepMinutes == null ? null : Number((log.sleepMinutes / 60).toFixed(1))),
   },
@@ -62,11 +62,13 @@ const trendSeries: TrendSeries[] = [
     label: "Calories",
     unit: "kcal",
     color: "var(--green)",
-    yDomain: ["auto", "auto"],
+    yDomain: [0, 0],
     tooltip: (value) => formatMetricValue(value, "kcal", 0),
     fromDailyLog: (log) => log.estimatedCalories,
   },
 ];
+
+const CALORIE_CAP_HEIGHT = 8;
 
 const weekdayFormatter = new Intl.DateTimeFormat(undefined, { weekday: "short" });
 
@@ -104,27 +106,48 @@ export function WeeklyTrendsChart({
     for (const series of trendSeries) {
       row[series.key] = log ? series.fromDailyLog(log) : null;
     }
+    const calories = log?.estimatedCalories ?? null;
+    if (calories != null) {
+      row.caloriesWithinTarget = Math.min(calories, calorieBaselineKcal);
+      row.caloriesSurplus = Math.max(0, calories - calorieBaselineKcal);
+    } else {
+      row.caloriesWithinTarget = null;
+      row.caloriesSurplus = null;
+    }
     row.weightKg = weightsByDate.get(date) ?? null;
     return row;
   });
 
   return (
-    <div className="grid gap-6 md:grid-cols-2">
+    <div className="grid gap-6 [@media(min-width:900px)]:grid-cols-2">
       <TrendPanel title="Weight" unit="kg" color="var(--green)" note="Recorded days this week">
         <WeightChart rows={rows} />
       </TrendPanel>
       {trendSeries.map((series) => {
-        const baseline = series.key === "estimatedCalories" ? calorieBaselineKcal : null;
+        const yDomain =
+          series.key === "estimatedCalories"
+            ? ([0, calorieBaselineKcal] as [AxisBound, AxisBound])
+            : series.yDomain;
 
         return (
           <TrendPanel
             key={series.key}
             title={series.label}
             unit={series.unit}
-            color={series.color}
-            note={series.key === "sleepHours" ? "Hours of a 24h day" : undefined}
+            color={series.key === "estimatedCalories" ? "var(--green)" : series.color}
+            note={series.key === "sleepHours" ? "Scale intended for typical sleep (up to 12 h)" : undefined}
           >
-            <BarChartTrend rows={rows} series={series} baseline={baseline} />
+            {series.key === "estimatedCalories" ? (
+              <CalorieBarChartTrend
+                rows={rows}
+                yDomain={yDomain}
+                baseline={calorieBaselineKcal}
+                unit={series.unit}
+                label={series.label}
+              />
+            ) : (
+              <BarChartTrend rows={rows} series={series} yDomain={yDomain} />
+            )}
           </TrendPanel>
         );
       })}
@@ -145,14 +168,14 @@ function TrendPanel({ title, unit, color, note, children }: TrendPanelProps) {
     <section aria-labelledby={`weekly-${title}-chart-title`} className="subtle-panel p-4">
       <div className="flex items-center gap-2">
         <span className="h-3 w-3 rounded-full" style={{ backgroundColor: color }} />
-        <h3 id={`weekly-${title}-chart-title`} className="font-bold text-[var(--ink)]">
+        <h3 id={`weekly-${title}-chart-title`} className="font-serif-display text-[22px] font-medium leading-none text-[var(--ink)]">
           {title}
         </h3>
         <span className="ml-auto text-xs font-bold uppercase text-[var(--muted)]">
           {note ? `${unit} · ${note}` : unit}
         </span>
       </div>
-      <div className="mt-4 h-80 min-w-0">{children}</div>
+      <div className="mt-4 h-64 min-w-0 sm:h-80">{children}</div>
     </section>
   );
 }
@@ -162,9 +185,9 @@ function WeightChart({ rows }: { rows: ChartRow[] }) {
 
   if (!hasData) {
     return (
-      <div className="grid h-full place-items-center rounded-[8px] border border-dashed border-[var(--panel-border)] bg-[var(--card)] px-4 text-center text-sm text-[var(--muted)]">
+      <p className="mt-4 grid h-64 place-items-center px-4 text-center text-sm text-[var(--muted)]">
         No weight measurements recorded this week.
-      </div>
+      </p>
     );
   }
 
@@ -215,42 +238,27 @@ function WeightChart({ rows }: { rows: ChartRow[] }) {
 interface BarChartTrendProps {
   rows: ChartRow[];
   series: TrendSeries;
-  baseline?: number | null;
+  yDomain: [AxisBound, AxisBound];
 }
 
-function BarChartTrend({ rows, series, baseline }: BarChartTrendProps) {
+function BarChartTrend({ rows, series, yDomain }: BarChartTrendProps) {
   const hasData = rows.some((row) => row[series.key] != null);
 
   if (!hasData) {
     return (
-      <div className="grid h-full place-items-center rounded-[8px] border border-dashed border-[var(--panel-border)] bg-[var(--card)] px-4 text-center text-sm text-[var(--muted)]">
+      <p className="mt-4 grid h-64 place-items-center px-4 text-center text-sm text-[var(--muted)]">
         No {series.label.toLowerCase()} recorded this week.
-      </div>
+      </p>
     );
   }
-
-  const chartData =
-    baseline == null
-      ? rows
-      : rows.map((row) => {
-          const value = row[series.key];
-          return value == null ? { ...row, [series.key]: null } : { ...row, [series.key]: Number(value) - baseline };
-        });
-
-  const yDomain: [AxisBound, AxisBound] = baseline == null ? series.yDomain : ["auto", "auto"];
-  const tickFormatter = (value: number) => formatDecimal(baseline == null ? Number(value) : baseline + Number(value));
-  const desc =
-    baseline == null
-      ? `${series.label} in ${series.unit}, per recorded day this week.`
-      : `${series.label} relative to the ${baseline} ${series.unit} baseline, per recorded day this week.`;
 
   return (
     <ResponsiveContainer width="100%" height="100%">
       <BarChart
-        data={chartData}
+        data={rows}
         margin={{ top: 8, right: 8, bottom: 8, left: 0 }}
         title={`Weekly ${series.label} trend`}
-        desc={desc}
+        desc={`${series.label} in ${series.unit}, per recorded day this week.`}
       >
         <CartesianGrid stroke="var(--grid-line)" vertical={false} />
         <XAxis
@@ -263,22 +271,144 @@ function BarChartTrend({ rows, series, baseline }: BarChartTrendProps) {
         <YAxis
           domain={yDomain}
           stroke="var(--muted)"
-          tickFormatter={tickFormatter}
+          tickFormatter={(value) => formatDecimal(Number(value))}
           tickLine={false}
           axisLine={false}
           width={50}
         />
         <Tooltip
-          formatter={(value) => {
-            const raw = baseline == null ? Number(value) : baseline + Number(value);
-            const label = baseline == null ? series.label : `${series.label} vs ${baseline} ${series.unit} baseline`;
-            return [series.tooltip(raw), label];
-          }}
+          formatter={(value) => [series.tooltip(Number(value)), series.label]}
           labelFormatter={(value) => formatFullDate(parseLocalDate(String(value)))}
           contentStyle={{ backgroundColor: "var(--card)", border: "1px solid var(--control-border)", borderRadius: "8px", color: "var(--ink)" }}
         />
         <Bar dataKey={series.key} name={series.label} fill={series.color} radius={[4, 4, 0, 0]} />
       </BarChart>
     </ResponsiveContainer>
+  );
+}
+
+interface CalorieBarChartTrendProps {
+  rows: ChartRow[];
+  yDomain: [AxisBound, AxisBound];
+  baseline: number;
+  unit: string;
+  label: string;
+}
+
+function CalorieBarChartTrend({ rows, yDomain, baseline, unit, label }: CalorieBarChartTrendProps) {
+  const hasData = rows.some((row) => row.caloriesWithinTarget != null);
+
+  if (!hasData) {
+    return (
+      <p className="mt-4 grid h-64 place-items-center px-4 text-center text-sm text-[var(--muted)]">
+        No {label.toLowerCase()} recorded this week.
+      </p>
+    );
+  }
+
+  const recorded = rows.filter((row) => row.caloriesWithinTarget != null);
+  const maxSurplus = Math.max(0, ...recorded.map((row) => Number(row.caloriesSurplus)));
+
+  return (
+    <div className="flex h-full flex-col">
+      <div className="min-h-0 flex-1">
+        <ResponsiveContainer width="100%" height="100%">
+          <BarChart
+            data={rows}
+            margin={{ top: CALORIE_CAP_HEIGHT + 2, right: 8, bottom: 8, left: 0 }}
+            title={`Weekly ${label} trend`}
+            desc={`Calories in ${unit}, against a fixed ${baseline} ${unit} target, per recorded day this week. Days over target show a surplus cap.`}
+          >
+            <CartesianGrid stroke="var(--grid-line)" vertical={false} />
+            <XAxis
+              dataKey="date"
+              stroke="var(--muted)"
+              tickFormatter={(value) => formatDayTick(String(value))}
+              tickLine={false}
+              axisLine={false}
+            />
+            <YAxis
+              domain={yDomain}
+              stroke="var(--muted)"
+              tickFormatter={(value) => formatDecimal(Number(value))}
+              tickLine={false}
+              axisLine={false}
+              width={50}
+            />
+            <Tooltip
+              formatter={(_value, name, item) => {
+                const payload = item?.payload as ChartRow | undefined;
+                return [formatCalorieRow(payload, baseline, unit), String(name)];
+              }}
+              labelFormatter={(value) => formatFullDate(parseLocalDate(String(value)))}
+              contentStyle={{ backgroundColor: "var(--card)", border: "1px solid var(--control-border)", borderRadius: "8px", color: "var(--ink)" }}
+            />
+            <Bar
+              dataKey="caloriesWithinTarget"
+              name={`Calories vs ${baseline} ${unit} target`}
+              fill="var(--green)"
+              shape={(props) => <CalorieBarShape {...props} baseline={baseline} />}
+            />
+          </BarChart>
+        </ResponsiveContainer>
+      </div>
+      <p className="mt-2 text-xs leading-5 text-[var(--muted)]">
+        Green bars are capped at the {formatMetricValue(baseline, unit, 0)} target.
+        {maxSurplus > 0
+          ? ` Days over target carry an orange cap (not to scale); the largest surplus is ${formatMetricValue(maxSurplus, unit, 0)}.`
+          : ""}
+      </p>
+    </div>
+  );
+}
+
+function formatCalorieRow(payload: ChartRow | undefined, baseline: number, unit: string): string {
+  const within = payload?.caloriesWithinTarget as number | null | undefined;
+  const surplus = payload?.caloriesSurplus as number | null | undefined;
+  if (within == null) {
+    return "Not recorded";
+  }
+  const total = within + (surplus ?? 0);
+  if ((surplus ?? 0) > 0) {
+    return `${formatMetricValue(total, unit, 0)} total · ${formatMetricValue(surplus ?? 0, unit, 0)} over the ${formatMetricValue(baseline, unit, 0)} target`;
+  }
+  return `${formatMetricValue(total, unit, 0)} within the ${formatMetricValue(baseline, unit, 0)} target`;
+}
+
+interface CalorieBarShapeProps {
+  x?: number;
+  y?: number;
+  width?: number;
+  height?: number;
+  payload?: ChartRow;
+  baseline: number;
+}
+
+function CalorieBarShape({ x, y, width, height, payload, baseline }: CalorieBarShapeProps) {
+  const within = (payload?.caloriesWithinTarget as number | null) ?? 0;
+  const surplus = (payload?.caloriesSurplus as number | null) ?? 0;
+  const barWidth = typeof width === "number" ? width : 0;
+
+  return (
+    <g>
+      <rect
+        x={typeof x === "number" ? x : 0}
+        y={typeof y === "number" ? y : 0}
+        width={barWidth}
+        height={typeof height === "number" ? height : 0}
+        fill="var(--green)"
+        rx={surplus > 0 ? 0 : 4}
+      />
+      {surplus > 0 && typeof y === "number" ? (
+        <rect
+          x={typeof x === "number" ? x : 0}
+          y={y - CALORIE_CAP_HEIGHT}
+          width={barWidth}
+          height={CALORIE_CAP_HEIGHT}
+          fill="var(--orange)"
+          rx={2}
+        />
+      ) : null}
+    </g>
   );
 }
