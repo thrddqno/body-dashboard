@@ -34,7 +34,7 @@ interface TrendSeries {
   label: string;
   unit: string;
   color: string;
-  yDomain: [AxisBound, AxisBound];
+  yDomain?: [AxisBound, AxisBound];
   tooltip: (value: number) => string;
   fromDailyLog: (log: DailyLog) => number | null;
 }
@@ -63,13 +63,10 @@ const trendSeries: TrendSeries[] = [
     label: "Calories",
     unit: "kcal",
     color: "var(--green)",
-    yDomain: [0, 0],
     tooltip: (value) => formatMetricValue(value, "kcal", 0),
     fromDailyLog: (log) => log.estimatedCalories,
   },
 ];
-
-const CALORIE_CAP_HEIGHT = 8;
 
 const weekdayFormatter = new Intl.DateTimeFormat(undefined, { weekday: "short" });
 
@@ -119,11 +116,17 @@ export function WeeklyTrendsChart({
     }
     const calories = log?.estimatedCalories ?? null;
     if (calories != null) {
-      row.caloriesWithinTarget = Math.min(calories, calorieBaselineKcal);
-      row.caloriesSurplus = Math.max(0, calories - calorieBaselineKcal);
+      const surplus = Math.max(0, calories - calorieBaselineKcal);
+      const visualSurplus = Math.min(surplus, calorieBaselineKcal);
+      row.caloriesTotal = calories;
+      row.caloriesSurplus = surplus;
+      row.caloriesBase = calories <= calorieBaselineKcal ? calories : calorieBaselineKcal - visualSurplus;
+      row.caloriesOverlay = visualSurplus;
     } else {
-      row.caloriesWithinTarget = null;
+      row.caloriesTotal = null;
       row.caloriesSurplus = null;
+      row.caloriesBase = null;
+      row.caloriesOverlay = null;
     }
     row.weightKg = weightsByDate.get(date) ?? null;
     return row;
@@ -138,7 +141,7 @@ export function WeeklyTrendsChart({
         const yDomain =
           series.key === "estimatedCalories"
             ? ([0, calorieBaselineKcal] as [AxisBound, AxisBound])
-            : series.yDomain;
+            : (series.yDomain ?? (["auto", "auto"] as const));
 
         return (
           <TrendPanel
@@ -307,7 +310,7 @@ interface CalorieBarChartTrendProps {
 }
 
 function CalorieBarChartTrend({ rows, yDomain, baseline, unit, label }: CalorieBarChartTrendProps) {
-  const hasData = rows.some((row) => row.caloriesWithinTarget != null);
+  const hasData = rows.some((row) => row.caloriesTotal != null);
 
   if (!hasData) {
     return (
@@ -317,7 +320,7 @@ function CalorieBarChartTrend({ rows, yDomain, baseline, unit, label }: CalorieB
     );
   }
 
-  const recorded = rows.filter((row) => row.caloriesWithinTarget != null);
+  const recorded = rows.filter((row) => row.caloriesTotal != null);
   const maxSurplus = Math.max(0, ...recorded.map((row) => Number(row.caloriesSurplus)));
 
   return (
@@ -326,9 +329,9 @@ function CalorieBarChartTrend({ rows, yDomain, baseline, unit, label }: CalorieB
         <ResponsiveContainer width="100%" height="100%">
           <BarChart
             data={rows}
-            margin={{ top: CALORIE_CAP_HEIGHT + 2, right: 8, bottom: 8, left: 0 }}
+            margin={{ top: 8, right: 8, bottom: 8, left: 0 }}
             title={`Weekly ${label} trend`}
-            desc={`Calories in ${unit}, against a fixed ${baseline} ${unit} target, per recorded day this week. Days over target show a surplus cap.`}
+            desc={`Calories in ${unit}, against a fixed ${baseline} ${unit} target, per recorded day this week. Days over target are drawn to the target size with an orange surplus segment.`}
           >
             <CartesianGrid stroke="var(--grid-line)" vertical={false} />
             <XAxis
@@ -347,26 +350,61 @@ function CalorieBarChartTrend({ rows, yDomain, baseline, unit, label }: CalorieB
               width={50}
             />
             <Tooltip
-              formatter={(_value, name, item) => {
-                const payload = item?.payload as ChartRow | undefined;
-                return [formatCalorieRow(payload, baseline, unit), String(name)];
+              content={({ active, payload }) => {
+                if (!active || !payload || payload.length === 0) {
+                  return null;
+                }
+                const row = payload[0].payload as ChartRow;
+                return (
+                  <div
+                    style={{
+                      backgroundColor: "var(--card)",
+                      border: "1px solid var(--control-border)",
+                      borderRadius: "8px",
+                      color: "var(--ink)",
+                      padding: "8px 12px",
+                      fontSize: "13px",
+                    }}
+                  >
+                    <p className="font-bold">{formatFullDate(parseLocalDate(String(row.date)))}</p>
+                    <p>{formatCalorieRow(row, baseline, unit)}</p>
+                  </div>
+                );
               }}
-              labelFormatter={(value) => formatFullDate(parseLocalDate(String(value)))}
-              contentStyle={{ backgroundColor: "var(--card)", border: "1px solid var(--control-border)", borderRadius: "8px", color: "var(--ink)" }}
             />
             <Bar
-              dataKey="caloriesWithinTarget"
-              name={`Calories vs ${baseline} ${unit} target`}
+              dataKey="caloriesBase"
+              name="In-target intake"
               fill="var(--green)"
-              shape={(props) => <CalorieBarShape {...props} />}
+              stackId="calories"
+              shape={(props) => <CalorieBaseBarShape {...props} />}
+            />
+            <Bar
+              dataKey="caloriesOverlay"
+              name="Surplus"
+              fill="var(--orange)"
+              stackId="calories"
+              radius={[4, 4, 0, 0]}
+              shape={(props) => <CalorieSurplusBarShape {...props} />}
             />
           </BarChart>
         </ResponsiveContainer>
       </div>
-      <p className="mt-2 text-xs leading-5 text-[var(--muted)]">
-        Green bars are capped at the {formatMetricValue(baseline, unit, 0)} target.
+      <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-[var(--muted)]">
+        <span className="inline-flex items-center gap-1.5">
+          <span className="h-2.5 w-2.5 rounded-full bg-[var(--green)]" />
+          In-target intake
+        </span>
+        <span className="inline-flex items-center gap-1.5">
+          <span className="h-2.5 w-2.5 rounded-full bg-[var(--orange)]" />
+          Surplus
+        </span>
+      </div>
+      <p className="mt-1 text-xs leading-5 text-[var(--muted)]">
+        Bars use the fixed {formatMetricValue(baseline, unit, 0)} target scale. Days over target are drawn as a
+        target-sized bar whose green part shows the in-target intake and orange part the surplus.
         {maxSurplus > 0
-          ? ` Days over target carry an orange cap (not to scale); the largest surplus is ${formatMetricValue(maxSurplus, unit, 0)}.`
+          ? ` The largest surplus is ${formatMetricValue(maxSurplus, unit, 0)}.`
           : ""}
       </p>
     </div>
@@ -374,19 +412,18 @@ function CalorieBarChartTrend({ rows, yDomain, baseline, unit, label }: CalorieB
 }
 
 function formatCalorieRow(payload: ChartRow | undefined, baseline: number, unit: string): string {
-  const within = payload?.caloriesWithinTarget as number | null | undefined;
+  const total = payload?.caloriesTotal as number | null | undefined;
   const surplus = payload?.caloriesSurplus as number | null | undefined;
-  if (within == null) {
+  if (total == null) {
     return "Not recorded";
   }
-  const total = within + (surplus ?? 0);
-  if ((surplus ?? 0) > 0) {
-    return `${formatMetricValue(total, unit, 0)} total · ${formatMetricValue(surplus ?? 0, unit, 0)} over the ${formatMetricValue(baseline, unit, 0)} target`;
+  if (surplus && surplus > 0) {
+    return `${formatMetricValue(total, unit, 0)} total · ${formatMetricValue(surplus, unit, 0)} over the ${formatMetricValue(baseline, unit, 0)} target`;
   }
   return `${formatMetricValue(total, unit, 0)} within the ${formatMetricValue(baseline, unit, 0)} target`;
 }
 
-interface CalorieBarShapeProps {
+interface CalorieBaseBarShapeProps {
   x?: number;
   y?: number;
   width?: number;
@@ -394,30 +431,41 @@ interface CalorieBarShapeProps {
   payload?: ChartRow;
 }
 
-function CalorieBarShape({ x, y, width, height, payload }: CalorieBarShapeProps) {
-  const surplus = (payload?.caloriesSurplus as number | null) ?? 0;
-  const barWidth = typeof width === "number" ? width : 0;
-
+function CalorieBaseBarShape({ x, y, width, height, payload }: CalorieBaseBarShapeProps) {
+  const overlay = (payload?.caloriesOverlay as number | null) ?? 0;
   return (
-    <g>
-      <rect
-        x={typeof x === "number" ? x : 0}
-        y={typeof y === "number" ? y : 0}
-        width={barWidth}
-        height={typeof height === "number" ? height : 0}
-        fill="var(--green)"
-        rx={surplus > 0 ? 0 : 4}
-      />
-      {surplus > 0 && typeof y === "number" ? (
-        <rect
-          x={typeof x === "number" ? x : 0}
-          y={y - CALORIE_CAP_HEIGHT}
-          width={barWidth}
-          height={CALORIE_CAP_HEIGHT}
-          fill="var(--orange)"
-          rx={2}
-        />
-      ) : null}
-    </g>
+    <rect
+      x={typeof x === "number" ? x : 0}
+      y={typeof y === "number" ? y : 0}
+      width={typeof width === "number" ? width : 0}
+      height={typeof height === "number" ? height : 0}
+      fill="var(--green)"
+      rx={overlay > 0 ? 0 : 4}
+    />
+  );
+}
+
+interface CalorieSurplusBarShapeProps {
+  x?: number;
+  y?: number;
+  width?: number;
+  height?: number;
+  payload?: ChartRow;
+}
+
+function CalorieSurplusBarShape({ x, y, width, height, payload }: CalorieSurplusBarShapeProps) {
+  const overlay = (payload?.caloriesOverlay as number | null) ?? 0;
+  if (overlay <= 0) {
+    return null;
+  }
+  return (
+    <rect
+      x={typeof x === "number" ? x : 0}
+      y={typeof y === "number" ? y : 0}
+      width={typeof width === "number" ? width : 0}
+      height={typeof height === "number" ? height : 0}
+      fill="var(--orange)"
+      rx={4}
+    />
   );
 }
