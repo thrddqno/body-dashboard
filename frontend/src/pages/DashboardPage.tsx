@@ -217,16 +217,6 @@ export function DashboardPage() {
       <DashboardHeader today={dashboard.today.date} periodLabel={periodLabel} />
       <WeeklySummary analytics={analytics} />
       <div className="mt-6">
-        <WeeklyTrendsChart
-          dailyLogs={dailyLogs}
-          bodyMetrics={bodyMetrics}
-          periodStart={analytics.period.start}
-          periodEnd={analytics.period.end}
-          calorieBaselineKcal={dashboard.body.goal.calorieTargetKcal}
-          error={trendsError}
-        />
-      </div>
-      <div className="mt-6">
         <WeeklyCalendar
           dates={weekDates}
           today={dashboard.today.date}
@@ -241,6 +231,16 @@ export function DashboardPage() {
           workouts={selectedDayWorkouts}
           plan={selectedTrainingPlan}
           planError={selectedTrainingPlanError}
+        />
+      </div>
+      <div className="mt-6">
+        <WeeklyTrendsChart
+          dailyLogs={dailyLogs}
+          bodyMetrics={bodyMetrics}
+          periodStart={analytics.period.start}
+          periodEnd={analytics.period.end}
+          calorieBaselineKcal={dashboard.body.goal.calorieTargetKcal}
+          error={trendsError}
         />
       </div>
       <div className="dashboard-body grid grid-cols-[minmax(0,1.65fr)_minmax(260px,0.75fr)] gap-[26px] pb-9 pt-[88px]">

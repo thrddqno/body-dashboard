@@ -46,11 +46,15 @@ The root page is a single working surface:
    - Each day is selectable.
    - Selected day reveals the planned warm-up, main work, finisher when present, and guardrails.
 
-5. Two-column dashboard body
+5. Weekly trends
+   - Chart grid with weight, sleep, steps, and calories for the current week.
+   - The calorie chart uses a fixed daily target scale; days over target show a not-to-scale surplus cap.
+
+6. Two-column dashboard body
    - Main column: coach notes, then workout log.
    - Side column: weekly summary, then body target card.
 
-6. Footer
+7. Footer
    - Small brand/system label and latest check-in date.
 
 ## Layout Rules
@@ -118,6 +122,10 @@ The workout log is a timeline of expandable sessions. Newest sessions appear fir
 
 Exercise detail rows are grid-based on desktop and collapse on mobile. If sets, reps, load, or RIR are unavailable, the UI says so plainly.
 
+### Weekly Trends
+
+Weekly trends render as a two-column grid of chart panels at 900px and above, collapsing to one column below that breakpoint. Each panel keeps the compact card language. The calorie panel caps its bars at the configured daily calorie target and shows surplus days with a fixed, explicitly not-to-scale cap so the scale always reads to the target. Chart headings use the serif display face, and panels with no recorded values show unframed muted text.
+
 ## Responsive Behavior
 
 At 900px and below:
@@ -125,6 +133,7 @@ At 900px and below:
 - Summary metrics become two columns.
 - Calendar becomes two columns.
 - Dashboard body becomes one column.
+- Weekly trends become one column.
 - Exercise rows collapse from three columns to one.
 
 At 560px and below:
