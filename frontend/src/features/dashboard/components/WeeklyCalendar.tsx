@@ -20,6 +20,11 @@ export function WeeklyCalendar({
 }: WeeklyCalendarProps) {
   const timezone =
     Intl.DateTimeFormat().resolvedOptions().timeZone || "Local time";
+  const mondayFirstDates = [...dates].sort((left, right) => {
+    const leftDay = (parseLocalDate(left).getDay() + 6) % 7;
+    const rightDay = (parseLocalDate(right).getDay() + 6) % 7;
+    return leftDay - rightDay;
+  });
 
   return (
     <section className="pt-11">
@@ -35,7 +40,7 @@ export function WeeklyCalendar({
         </p>
       </div>
       <div className="calendar-grid mt-6 grid grid-cols-7 gap-3">
-        {dates.map((date) => {
+        {mondayFirstDates.map((date) => {
           const day = parseLocalDate(date);
           const selected = date === selectedDate;
           const workouts = workoutsByDate[date] ?? [];

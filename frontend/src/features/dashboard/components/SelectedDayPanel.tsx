@@ -8,6 +8,7 @@ import type { Workout } from "@/types/workout";
 import { formatFullDateString } from "@/utils/formatters";
 
 interface SelectedDayPanelProps {
+  today?: string;
   selectedDate: string;
   workouts: Workout[];
   plan?: TrainingPlan | null;
@@ -15,6 +16,7 @@ interface SelectedDayPanelProps {
 }
 
 export function SelectedDayPanel({
+  today,
   selectedDate,
   workouts,
   plan,
@@ -48,7 +50,11 @@ export function SelectedDayPanel({
             <WorkoutList workouts={workouts} />
 
             {plan && hasPlannedWorkout && plan.type !== "rest" && (
-              <PlannedWorkoutView date={selectedDate} plan={plan} />
+              <PlannedWorkoutView
+                date={selectedDate}
+                plan={plan}
+                canSavePng={selectedDate === today}
+              />
             )}
 
             {plan?.type === "rest" && hasPlannedWorkout && (

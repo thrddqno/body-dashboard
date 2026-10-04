@@ -227,6 +227,7 @@ export function DashboardPage() {
       </div>
       <div className="mt-6">
         <SelectedDayPanel
+          today={dashboard.today.date}
           selectedDate={selectedDate}
           workouts={selectedDayWorkouts}
           plan={selectedTrainingPlan}

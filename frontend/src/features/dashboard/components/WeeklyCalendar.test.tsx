@@ -40,4 +40,21 @@ describe("WeeklyCalendar", () => {
     fireEvent.click(emptyDay);
     expect(onSelectDate).toHaveBeenCalledWith("2026-09-01");
   });
+
+  it("orders the training week from Monday through Sunday", () => {
+    render(
+      <WeeklyCalendar
+        dates={["2026-09-06", "2026-08-31", "2026-09-01"]}
+        today="2026-08-31"
+        workoutsByDate={{}}
+        selectedDate="2026-08-31"
+        onSelectDate={vi.fn()}
+      />,
+    );
+
+    const dayButtons = screen.getAllByRole("button");
+    expect(dayButtons[0]).toHaveAccessibleName(/mon.*aug 31/i);
+    expect(dayButtons[1]).toHaveAccessibleName(/tue.*sep 1/i);
+    expect(dayButtons[2]).toHaveAccessibleName(/sun.*sep 6/i);
+  });
 });

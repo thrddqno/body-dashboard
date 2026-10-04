@@ -1,5 +1,7 @@
+import { useRef, useState } from "react";
 import type { PlannedWorkout } from "@/types/plannedWorkout";
 import { PlannedExerciseCard } from "@/features/workouts/components/PlannedExerciseCard";
+import { WorkoutPlanImage } from "@/features/workouts/components/WorkoutPlanImage";
 import { WarmupSection } from "@/features/workouts/components/WarmupSection";
 import { GuardrailsSection } from "@/features/workouts/components/GuardrailsSection";
 import { formatPlanEyebrow } from "@/utils/formatters";
@@ -8,9 +10,40 @@ import { Link } from "react-router-dom";
 interface PlannedWorkoutViewProps {
   date: string;
   plan: PlannedWorkout;
+  canSavePng?: boolean;
 }
 
-export function PlannedWorkoutView({ date, plan }: PlannedWorkoutViewProps) {
+export function PlannedWorkoutView({ date, plan, canSavePng = false }: PlannedWorkoutViewProps) {
+  const imageRef = useRef<HTMLDivElement>(null);
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string>();
+
+  async function savePng() {
+    if (!imageRef.current || isSaving) return;
+
+    setIsSaving(true);
+    setSaveError(undefined);
+
+    try {
+      const { toPng } = await import("html-to-image");
+      const dataUrl = await toPng(imageRef.current, {
+        backgroundColor: "#f6f7f9",
+        cacheBust: true,
+        height: 1920,
+        pixelRatio: 1,
+        width: 1080,
+      });
+      const download = document.createElement("a");
+      download.download = `move-free-workout-${date}.png`;
+      download.href = dataUrl;
+      download.click();
+    } catch {
+      setSaveError("Unable to save the workout image. Please try again.");
+    } finally {
+      setIsSaving(false);
+    }
+  }
+
   return (
     <div className="space-y-5 border-t border-[var(--ink)]/20">
       <div className="flex mt-6 items-center justify-between gap-4">
@@ -21,11 +54,27 @@ export function PlannedWorkoutView({ date, plan }: PlannedWorkoutViewProps) {
           </h3>
           <p className="mt-1 text-sm text-[var(--muted)]">{plan.subtitle}</p>
         </div>
-        <Link
-          to={`/workouts/`}
-          className="button-secondary shrink-0"
-        >Log Workout</Link>
+        <div className="flex shrink-0 flex-wrap justify-end gap-2">
+          {canSavePng ? (
+            <button
+              type="button"
+              className="button-secondary"
+              disabled={isSaving}
+              onClick={() => void savePng()}
+            >
+              {isSaving ? "Saving..." : "Save PNG"}
+            </button>
+          ) : null}
+          <Link
+            to="/workouts/"
+            className="button-secondary"
+          >
+            Log Workout
+          </Link>
+        </div>
       </div>
+
+      {saveError ? <p role="alert" className="text-sm text-[var(--danger)]">{saveError}</p> : null}
 
       <WarmupSection items={plan.warmup} />
 
@@ -52,6 +101,12 @@ export function PlannedWorkoutView({ date, plan }: PlannedWorkoutViewProps) {
       ) : null}
 
       <GuardrailsSection items={plan.guardrails} />
+
+      {canSavePng ? (
+        <div aria-hidden="true" className="pointer-events-none fixed left-[-10000px] top-0">
+          <WorkoutPlanImage ref={imageRef} date={date} plan={plan} />
+        </div>
+      ) : null}
     </div>
   );
 }
