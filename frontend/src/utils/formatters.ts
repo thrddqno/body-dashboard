@@ -55,12 +55,15 @@ export function formatCompactDateString(date: string): string {
 
 export function formatPlanEyebrow(
   date: string,
-  referenceDate = new Date(),
+  referenceDate: Date | string = new Date(),
 ): string {
+  const parsedReferenceDate = typeof referenceDate === "string"
+    ? parseLocalDate(referenceDate)
+    : referenceDate;
   const today = new Date(
-    referenceDate.getFullYear(),
-    referenceDate.getMonth(),
-    referenceDate.getDate(),
+    parsedReferenceDate.getFullYear(),
+    parsedReferenceDate.getMonth(),
+    parsedReferenceDate.getDate(),
   );
   const yesterday = new Date(today);
   yesterday.setDate(today.getDate() - 1);

@@ -1,4 +1,5 @@
 import { StatusBadge } from "@/components/StatusBadge";
+import type { TrainingPlan } from "@/types/plannedWorkout";
 import type { Workout } from "@/types/workout";
 import { parseLocalDate } from "@/utils/dates";
 import { formatCompactDateString, formatWorkoutType } from "@/utils/formatters";
@@ -7,6 +8,7 @@ interface WeeklyCalendarProps {
   dates: string[];
   today: string;
   workoutsByDate: Record<string, Workout[]>;
+  plansByDate: Record<string, TrainingPlan>;
   selectedDate: string;
   onSelectDate: (date: string) => void;
 }
@@ -15,6 +17,7 @@ export function WeeklyCalendar({
   dates,
   today,
   workoutsByDate,
+  plansByDate,
   selectedDate,
   onSelectDate,
 }: WeeklyCalendarProps) {
@@ -44,6 +47,7 @@ export function WeeklyCalendar({
           const day = parseLocalDate(date);
           const selected = date === selectedDate;
           const workouts = workoutsByDate[date] ?? [];
+          const plan = plansByDate[date];
           const primaryWorkout = workouts[0];
           const statuses = new Set(workouts.map((workout) => workout.status));
           const stateBorder = statuses.has("MISSED")
@@ -115,29 +119,31 @@ export function WeeklyCalendar({
                   {workouts.length === 1 ? "" : "s"}
                 </span>
 
-                {primaryWorkout ? (
-                  <div>
-                    <p
-                      className={`truncate text-sm font-bold ${
-                        isToday ? "text-[var(--on-strong)]" : "text-[var(--ink)]"
-                      }`}
-                    >
-                      {formatWorkoutType(primaryWorkout.workoutType)}
-                    </p>
+                <div>
+                  <p
+                    className={`truncate text-sm font-bold ${
+                      isToday ? "text-[var(--on-strong)]" : "text-[var(--ink)]"
+                    }`}
+                  >
+                    {plan?.title ?? (primaryWorkout
+                      ? formatWorkoutType(primaryWorkout.workoutType)
+                      : "Plan unavailable")}
+                  </p>
 
+                  {primaryWorkout ? (
                     <div className="mt-2">
                       <StatusBadge status={primaryWorkout.status} />
                     </div>
-                  </div>
-                ) : (
-                  <p
-                    className={`text-xs ${
-                      isToday ? "text-[var(--today-muted)]" : "text-[var(--muted)]"
-                    }`}
-                  >
-                    No workout reported
-                  </p>
-                )}
+                  ) : (
+                    <p
+                      className={`mt-2 text-xs ${
+                        isToday ? "text-[var(--today-muted)]" : "text-[var(--muted)]"
+                      }`}
+                    >
+                      No workout reported
+                    </p>
+                  )}
+                </div>
               </div>
             </button>
           );

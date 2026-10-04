@@ -4,14 +4,15 @@ import { GuardrailsSection } from "@/features/workouts/components/GuardrailsSect
 
 interface RestDayViewProps {
   date: string;
+  today?: string;
   plan: PlannedWorkout;
 }
 
-export function RestDayView({ date, plan }: RestDayViewProps) {
+export function RestDayView({ date, today, plan }: RestDayViewProps) {
   return (
     <div className="space-y-5">
       <div>
-        <p className="eyebrow">{formatPlanEyebrow(date)}</p>
+        <p className="eyebrow">{formatPlanEyebrow(date, today)}</p>
         <h3 className="font-serif-display mt-2 text-2xl font-medium text-[var(--ink)]">
           {plan.title}
         </h3>

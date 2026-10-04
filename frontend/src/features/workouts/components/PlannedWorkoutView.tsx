@@ -9,6 +9,7 @@ import { Link } from "react-router-dom";
 
 interface PlannedWorkoutViewProps {
   date: string;
+  today?: string;
   plan: PlannedWorkout;
   plannedWorkoutId?: number;
   canSavePng?: boolean;
@@ -16,6 +17,7 @@ interface PlannedWorkoutViewProps {
 
 export function PlannedWorkoutView({
   date,
+  today,
   plan,
   plannedWorkoutId,
   canSavePng = false,
@@ -54,7 +56,7 @@ export function PlannedWorkoutView({
     <div className="space-y-5 border-t border-[var(--ink)]/20">
       <div className="flex mt-6 items-center justify-between gap-4">
         <div>
-          <p className="eyebrow">{formatPlanEyebrow(date)}</p>
+          <p className="eyebrow">{formatPlanEyebrow(date, today)}</p>
           <h3 className="font-serif-display mt-2 text-2xl font-medium text-[var(--ink)]">
             {plan.title}
           </h3>

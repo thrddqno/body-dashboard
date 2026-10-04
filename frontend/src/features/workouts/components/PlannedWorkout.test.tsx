@@ -125,10 +125,11 @@ function renderPanel(
   date: string,
   workouts: Workout[] = [],
   plan: TrainingPlan = getPlannedWorkout(date),
+  today?: string,
 ) {
   return render(
     <MemoryRouter>
-      <SelectedDayPanel selectedDate={date} workouts={workouts} plan={plan} />
+      <SelectedDayPanel today={today} selectedDate={date} workouts={workouts} plan={plan} />
     </MemoryRouter>,
   );
 }
@@ -181,6 +182,13 @@ describe("Planned workout fallback", () => {
 
     expect(screen.getByText("Supported Split Squat")).toBeInTheDocument();
     expect(screen.getAllByText("2-3 sets").length).toBeGreaterThanOrEqual(1);
+  });
+
+  it("uses the dashboard date for the relative plan label", () => {
+    renderPanel("2026-09-02", [], getPlannedWorkout("2026-09-02"), "2026-09-02");
+
+    expect(screen.getByText("Today's Plan")).toBeInTheDocument();
+    expect(screen.queryByText("Tomorrow's Plan")).not.toBeInTheDocument();
   });
 
   it("renders Lower B substitutions, back guidance, and optional cardio", () => {

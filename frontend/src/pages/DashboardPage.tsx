@@ -47,6 +47,7 @@ export function DashboardPage() {
   const [isAnalysisLoading, setIsAnalysisLoading] = useState(true);
   const [analysisError, setAnalysisError] = useState<string>();
   const [trainingPlan, setTrainingPlan] = useState<TrainingPlan | null>(null);
+  const [trainingPlansByDate, setTrainingPlansByDate] = useState<Record<string, TrainingPlan>>({});
   const [trainingPlanError, setTrainingPlanError] = useState<{ date: string; message: string }>();
 
   useEffect(() => {
@@ -69,7 +70,8 @@ export function DashboardPage() {
 
         if (controller.signal.aborted) return;
 
-        const [workoutsResult, dailyLogsResult] = await Promise.allSettled([
+        const weekDates = getWeekDates(analyticsResponse.period.start, analyticsResponse.period.end);
+        const [workoutsResult, dailyLogsResult, trainingPlansResult] = await Promise.allSettled([
           listWorkoutsByDateRange(
             analyticsResponse.period.start,
             analyticsResponse.period.end,
@@ -79,6 +81,12 @@ export function DashboardPage() {
             analyticsResponse.period.start,
             analyticsResponse.period.end,
             controller.signal,
+          ),
+          Promise.all(
+            weekDates.map(async (date) => [
+              date,
+              await getTrainingPlan(date, controller.signal),
+            ] as const),
           ),
         ]);
 
@@ -94,6 +102,11 @@ export function DashboardPage() {
           setTrendsError("Sleep, steps, and calorie data could not be loaded.");
           setDailyLogs([]);
         }
+        setTrainingPlansByDate(
+          trainingPlansResult.status === "fulfilled"
+            ? Object.fromEntries(trainingPlansResult.value)
+            : {},
+        );
       } catch (loadError) {
         if (loadError instanceof Error && loadError.name === "AbortError") {
           return;
@@ -219,6 +232,7 @@ export function DashboardPage() {
           dates={weekDates}
           today={dashboard.today.date}
           workoutsByDate={workoutsByDate}
+          plansByDate={trainingPlansByDate}
           selectedDate={selectedDate}
           onSelectDate={setSelectedDate}
         />

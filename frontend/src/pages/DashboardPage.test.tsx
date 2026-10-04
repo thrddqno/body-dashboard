@@ -42,7 +42,13 @@ vi.mock("@/features/dashboard/components/CoachNotes", () => ({ CoachNotes: () =>
 vi.mock("@/features/dashboard/components/DashboardHeader", () => ({ DashboardHeader: () => null }));
 vi.mock("@/features/dashboard/components/DashboardSidePanels", () => ({ DashboardSidePanels: () => null }));
 vi.mock("@/features/dashboard/components/SelectedDayPanel", () => ({ SelectedDayPanel: () => null }));
-vi.mock("@/features/dashboard/components/WeeklyCalendar", () => ({ WeeklyCalendar: () => null }));
+vi.mock("@/features/dashboard/components/WeeklyCalendar", () => ({
+  WeeklyCalendar: ({ plansByDate }: { plansByDate: Record<string, { title: string }> }) => (
+    <div data-testid="weekly-plan-titles">
+      {Object.values(plansByDate).map((plan) => plan.title).join(",")}
+    </div>
+  ),
+}));
 vi.mock("@/features/dashboard/components/WeeklySummary", () => ({ WeeklySummary: () => null }));
 vi.mock("@/features/dashboard/components/WeeklyTrendsChart", () => ({
   WeeklyTrendsChart: ({
@@ -119,17 +125,26 @@ describe("DashboardPage workout history", () => {
     });
     mocks.getDailyLogsInRange.mockResolvedValue([]);
     mocks.getLatestWeeklyAiAnalysis.mockResolvedValue(null);
-    mocks.getTrainingPlan.mockResolvedValue({
-      date: "2026-08-31",
-      dayOfWeek: "Monday",
-      workoutType: "UPPER_A",
-      type: "workout",
-      title: "Upper A",
+    const titlesByDate: Record<string, string> = {
+      "2026-08-31": "Upper A",
+      "2026-09-01": "Lower A",
+      "2026-09-02": "Rest",
+      "2026-09-03": "Rest",
+      "2026-09-04": "Rest",
+      "2026-09-05": "Upper B",
+      "2026-09-06": "Lower B",
+    };
+    mocks.getTrainingPlan.mockImplementation(async (date: string) => ({
+      date,
+      dayOfWeek: "",
+      workoutType: "REST",
+      type: titlesByDate[date] === "Rest" ? "rest" : "workout",
+      title: titlesByDate[date],
       subtitle: "",
       warmup: [],
       exercises: [],
       guardrails: [],
-    });
+    }));
     mocks.listWorkoutsByDateRange.mockResolvedValue([]);
     mocks.listWorkoutPage.mockImplementation(async (page: number, pageSize: number) => ({
       workouts: [workout(page + 1)],
@@ -149,6 +164,9 @@ describe("DashboardPage workout history", () => {
 
     expect(await screen.findByText("Page 1 of 3 · 18 workouts")).toBeInTheDocument();
     expect(screen.getByTestId("trend-metric-dates")).toHaveTextContent("2026-08-24,2026-08-31");
+    expect(screen.getByTestId("weekly-plan-titles")).toHaveTextContent(
+      "Upper A,Lower A,Rest,Rest,Rest,Upper B,Lower B",
+    );
     expect(mocks.listWorkoutsByDateRange).toHaveBeenCalledWith(
       "2026-08-31",
       "2026-09-06",

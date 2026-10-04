@@ -19,6 +19,11 @@ describe("formatters", () => {
     expect(formatPlanEyebrow("2026-09-04", today)).toBe("Friday's Plan");
   });
 
+  it("uses an authoritative date string instead of the browser clock", () => {
+    expect(formatPlanEyebrow("2026-09-02", "2026-09-02")).toBe("Today's Plan");
+    expect(formatPlanEyebrow("2026-09-03", "2026-09-02")).toBe("Tomorrow's Plan");
+  });
+
   it("converts sleep between decimal hours and persisted minutes", () => {
     expect(sleepMinutesToHoursInput(522)).toBe("8.7");
     expect(sleepHoursInputToMinutes("8.7")).toBe(522);

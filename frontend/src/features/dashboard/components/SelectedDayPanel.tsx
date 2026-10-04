@@ -52,6 +52,7 @@ export function SelectedDayPanel({
             {plan && plannedWorkout && plan.type !== "rest" && (
               <PlannedWorkoutView
                 date={selectedDate}
+                today={today}
                 plan={plan}
                 plannedWorkoutId={plannedWorkout.id}
                 canSavePng={selectedDate === today}
@@ -59,14 +60,14 @@ export function SelectedDayPanel({
             )}
 
             {plan?.type === "rest" && plannedWorkout && (
-              <RestDayView date={selectedDate} plan={plan} />
+              <RestDayView date={selectedDate} today={today} plan={plan} />
             )}
 
           </>
         ) : plan?.type === "rest" ? (
-          <RestDayView date={selectedDate} plan={plan} />
+          <RestDayView date={selectedDate} today={today} plan={plan} />
         ) : plan ? (
-          <PlannedWorkoutView date={selectedDate} plan={plan} />
+          <PlannedWorkoutView date={selectedDate} today={today} plan={plan} />
         ) : null}
       </div>
     </section>
