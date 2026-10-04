@@ -152,7 +152,7 @@ Example workout-date response:
     {
       "id": 12,
       "date": "2026-09-01",
-      "workoutType": "PUSH",
+      "workoutType": "LOWER_A",
       "status": "COMPLETED",
       "notes": null,
       "exercises": []

@@ -5,7 +5,7 @@ import { EmptyState } from "@/components/EmptyState";
 import { StatusBadge } from "@/components/StatusBadge";
 import type { Workout } from "@/types/workout";
 import { parseLocalDate } from "@/utils/dates";
-import { formatNullableText } from "@/utils/formatters";
+import { formatNullableText, formatWorkoutType } from "@/utils/formatters";
 
 interface WorkoutListProps {
   workouts: Workout[];
@@ -53,7 +53,7 @@ export function WorkoutList({ workouts }: WorkoutListProps) {
 
             <div className="min-w-0">
               <h3 className="font-serif-display text-xl font-medium text-[var(--ink)] transition-colors group-hover:text-[var(--green)]">
-                {workout.workoutType}
+                {formatWorkoutType(workout.workoutType)}
               </h3>
               <p className="mobile-optional mt-1 truncate text-xs text-[var(--muted)]">{formatNullableText(workout.notes)}</p>
               <p className="mt-2 text-[10px] font-black uppercase text-[var(--muted)]">

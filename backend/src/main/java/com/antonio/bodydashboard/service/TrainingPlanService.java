@@ -5,6 +5,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
+import java.util.Set;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,6 +18,7 @@ import tools.jackson.databind.ObjectMapper;
 
 @Service
 public class TrainingPlanService {
+	private static final Set<String> RETIRED_WORKOUT_TYPES = Set.of("PUSH", "PULL", "LEGS", "UPPER", "LOWER");
 
 	private final TrainingPlanRepository repository;
 	private final ObjectMapper objectMapper;
@@ -47,9 +49,15 @@ public class TrainingPlanService {
 			return scheduledPlan.map(plan -> toResponse(date, plan));
 		}
 
-		return repository.findByWorkoutType(normalizedWorkoutType).stream()
-				.min(Comparator.comparing(TrainingPlan::getDayOfWeek))
+		Optional<TrainingPlanResponse> matchingPlan = repository.findByWorkoutType(normalizedWorkoutType).stream()
+				.min(Comparator.comparing(TrainingPlan::getDayOfWeek, Comparator.nullsLast(Comparator.naturalOrder())))
 				.map(plan -> toResponse(date, plan));
+
+		if (matchingPlan.isPresent() || !RETIRED_WORKOUT_TYPES.contains(normalizedWorkoutType)) {
+			return matchingPlan;
+		}
+
+		return scheduledPlan.map(plan -> toResponse(date, plan));
 	}
 
 	private TrainingPlanResponse toResponse(LocalDate date, TrainingPlan plan) {

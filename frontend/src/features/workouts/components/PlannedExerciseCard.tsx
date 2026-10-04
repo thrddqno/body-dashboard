@@ -7,8 +7,12 @@ interface PlannedExerciseCardProps {
 export function PlannedExerciseCard({ exercise }: PlannedExerciseCardProps) {
   const details: string[] = [];
 
-  if (exercise.sets != null && exercise.reps) {
+  if (exercise.setPrescription) {
+    details.push(exercise.setPrescription);
+  } else if (exercise.sets != null && exercise.reps) {
     details.push(`${exercise.sets} × ${exercise.reps}`);
+  } else if (exercise.sets != null) {
+    details.push(`${exercise.sets} set${exercise.sets === 1 ? "" : "s"}`);
   }
 
   if (exercise.rir) {

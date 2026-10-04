@@ -26,7 +26,7 @@ function workout(id: number) {
   return {
     id,
     date: `2026-08-${String(id).padStart(2, "0")}`,
-    workoutType: "PUSH",
+    workoutType: "LOWER_A",
     status: "COMPLETED" as const,
     notes: null,
     exercises: [],
@@ -48,7 +48,7 @@ describe("WorkoutsPage pagination", () => {
     mocks.createWorkout.mockReset();
     mocks.getTrainingPlan.mockReset();
     mocks.listWorkoutPage.mockReset();
-    mocks.getTrainingPlan.mockResolvedValue({ workoutType: "PUSH" });
+    mocks.getTrainingPlan.mockResolvedValue({ workoutType: "LOWER_A" });
     mocks.listWorkoutPage.mockImplementation(async (page: number, pageSize: number) => ({
       workouts: [workout(page + 1)],
       page,

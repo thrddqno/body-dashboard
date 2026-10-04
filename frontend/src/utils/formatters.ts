@@ -153,6 +153,14 @@ export function formatWorkoutStatus(value: WorkoutStatus): string {
   return value.toLowerCase();
 }
 
+export function formatWorkoutType(value: string): string {
+  return value
+    .trim()
+    .toLowerCase()
+    .replaceAll("_", " ")
+    .replace(/\b\w/g, (character) => character.toUpperCase());
+}
+
 export function formatSignedWeightChange(value: number | null): string {
   if (value == null) {
     return "Not enough data";

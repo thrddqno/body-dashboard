@@ -1,7 +1,7 @@
 import { StatusBadge } from "@/components/StatusBadge";
 import type { Workout } from "@/types/workout";
 import { parseLocalDate } from "@/utils/dates";
-import { formatCompactDateString } from "@/utils/formatters";
+import { formatCompactDateString, formatWorkoutType } from "@/utils/formatters";
 
 interface WeeklyCalendarProps {
   dates: string[];
@@ -117,7 +117,7 @@ export function WeeklyCalendar({
                         isToday ? "text-[var(--on-strong)]" : "text-[var(--ink)]"
                       }`}
                     >
-                      {primaryWorkout.workoutType}
+                      {formatWorkoutType(primaryWorkout.workoutType)}
                     </p>
 
                     <div className="mt-2">

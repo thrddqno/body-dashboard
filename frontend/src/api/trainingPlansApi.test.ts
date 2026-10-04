@@ -9,10 +9,10 @@ describe("trainingPlansApi", () => {
     const response = {
       date: "2026-09-01",
       dayOfWeek: "TUESDAY",
-      workoutType: "PUSH",
+      workoutType: "LOWER_A",
       type: "workout",
-      title: "Push",
-      subtitle: "Chest, shoulders, triceps",
+      title: "Lower A",
+      subtitle: "Lower body strength and core",
       warmup: [],
       exercises: [],
       guardrails: [],

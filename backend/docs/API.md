@@ -150,6 +150,6 @@ The application uses `ApiError` for the cases above. Unrecognized persistence fa
 
 ### `GET /api/training-plans/{date}`
 
-Returns the persisted recurring plan for an ISO `yyyy-MM-dd` date. By default, the date's weekday selects the template. An optional `workoutType` query parameter selects the complete persisted template for a planned override, for example `GET /api/training-plans/2026-09-01?workoutType=UPPER`.
+Returns the persisted recurring plan for an ISO `yyyy-MM-dd` date. By default, the date's weekday selects the template. An optional `workoutType` query parameter selects the complete persisted template for a planned override, for example `GET /api/training-plans/2026-09-01?workoutType=UPPER_B`.
 
-The response includes the requested date and weekday, canonical workout type, display content, exercises, warm-up, guardrails, and optional recovery activities. Workout-type matching is case-insensitive. Invalid dates return `400`; an unconfigured weekday or workout type returns `404`.
+The active schedule uses `UPPER_A`, `LOWER_A`, `REST`, `UPPER_B`, and `LOWER_B`; Wednesday through Friday are rest days. The response includes the requested date and weekday, canonical workout type, display content, exercises, warm-up, guardrails, and optional activities. Planned exercises may use `setPrescription` when the plan specifies sets without a rep target or uses a set range. Workout-type matching is case-insensitive. Retired split values resolve to the current weekday for compatibility with existing planned records. Invalid dates return `400`; an unconfigured weekday or unknown workout type returns `404`.

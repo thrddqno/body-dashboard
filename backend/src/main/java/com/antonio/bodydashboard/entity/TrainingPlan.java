@@ -26,7 +26,7 @@ public class TrainingPlan {
 	@Column(name = "content_json", nullable = false, columnDefinition = "text")
 	private String contentJson;
 
-	@Column(name = "workout_type", nullable = false, length = 10)
+	@Column(name = "workout_type", nullable = false, length = 20)
 	private String workoutType;
 
 	public Long getId() {

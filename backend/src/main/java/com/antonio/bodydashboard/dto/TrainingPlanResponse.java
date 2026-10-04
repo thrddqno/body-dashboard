@@ -26,6 +26,7 @@ public record TrainingPlanResponse(
 	public record Exercise(
 			String name,
 			Integer sets,
+			String setPrescription,
 			String reps,
 			String rir,
 			String rest,

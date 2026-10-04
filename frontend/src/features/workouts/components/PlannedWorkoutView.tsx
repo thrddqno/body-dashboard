@@ -38,6 +38,19 @@ export function PlannedWorkoutView({ date, plan }: PlannedWorkoutViewProps) {
         </div>
       </div>
 
+      {plan.optional && plan.optional.length > 0 ? (
+        <div className="rounded-[8px] border border-dashed border-[var(--panel-border)] bg-[var(--paper)] p-5">
+          <p className="eyebrow">Optional</p>
+          <ul className="mt-3 space-y-1">
+            {plan.optional.map((item) => (
+              <li key={item} className="text-sm leading-5 text-[var(--ink)]">
+                {item}
+              </li>
+            ))}
+          </ul>
+        </div>
+      ) : null}
+
       <GuardrailsSection items={plan.guardrails} />
     </div>
   );

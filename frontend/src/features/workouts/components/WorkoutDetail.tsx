@@ -1,6 +1,6 @@
 import { StatusBadge } from "@/components/StatusBadge";
 import type { Workout, WorkoutStatus } from "@/types/workout";
-import { formatFullDateString, formatMetricValue, formatNullableText } from "@/utils/formatters";
+import { formatFullDateString, formatMetricValue, formatNullableText, formatWorkoutType } from "@/utils/formatters";
 
 interface WorkoutDetailProps {
   workout: Workout;
@@ -22,7 +22,7 @@ export function WorkoutDetail({
           <p className="eyebrow">
             Workout detail
           </p>
-          <h1 className="font-serif-display mt-2 text-4xl font-medium text-[var(--ink)]">{workout.workoutType}</h1>
+          <h1 className="font-serif-display mt-2 text-4xl font-medium text-[var(--ink)]">{formatWorkoutType(workout.workoutType)}</h1>
           <p className="mt-3 text-sm text-[var(--muted)]">{formatFullDateString(workout.date)}</p>
         </div>
         <div className="flex flex-col items-start gap-3 md:items-end">

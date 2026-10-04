@@ -12,9 +12,9 @@ PostgreSQL is the source of truth. Flyway migrations are append-only; Hibernate 
 | `workout_exercises` | Ordered workout exercise | FK to workout; positive `order_index` |
 | `exercise_sets` | Ordered exercise set | FK to exercise; nonnegative weight, positive reps, RIR 0-10 |
 | `weekly_ai_analyses` | Saved weekly AI interpretations | Generated timestamp plus JSON analysis payload |
-| `training_plans` | Recurring weekday training templates | One seeded plan per weekday with a canonical workout type and JSON presentation content |
+| `training_plans` | Recurring weekday and optional training templates | One active plan per weekday plus optional unscheduled templates, with a canonical workout type and JSON presentation content |
 
-Migrations: `V1__create_body_metrics.sql`, `V2__create_daily_logs.sql`, `V3__create_workouts.sql`, `V4__create_weekly_ai_analyses.sql`, `V5__create_training_plans.sql`, and `V6__add_training_plan_workout_type.sql`. V5 seeds the seven recurring weekday plans previously owned by the frontend; V6 stores their canonical workout types independently of display titles.
+Migrations are append-only. `V5` seeds the original recurring plans, `V6` adds canonical workout types, `V7` adds an unscheduled Full Body template, and `V8` replaces the active weekdays with the four-day Upper/Lower split. Historical rows in the workout aggregate are independent of these templates.
 
 ## Entity Shape
 

@@ -26,7 +26,8 @@ class TrainingPlanMcpToolsTest {
 	void delegatesTrainingPlanLookup() {
 		LocalDate date = LocalDate.of(2026, 9, 1);
 		TrainingPlanResponse plan = new TrainingPlanResponse(
-				date, DayOfWeek.TUESDAY, "PUSH", "workout", "Push", "Chest", List.of(), List.of(), List.of(), List.of());
+				date, DayOfWeek.TUESDAY, "LOWER_A", "workout", "Lower A", "Lower body strength and core",
+				List.of(), List.of(), List.of(), List.of());
 		when(service.getForDate(date)).thenReturn(Optional.of(plan));
 
 		TrainingPlanMcpTools.TrainingPlanResult result = tools.getTrainingPlan("2026-09-01");

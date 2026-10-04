@@ -15,7 +15,7 @@ describe("WorkoutForm", () => {
       />,
     );
 
-    fireEvent.change(screen.getByLabelText("Workout type"), { target: { value: "UPPER" } });
+    fireEvent.change(screen.getByLabelText("Workout type"), { target: { value: "UPPER_A" } });
     fireEvent.click(screen.getByRole("button", { name: "Add exercise" }));
     fireEvent.change(screen.getByLabelText("Exercise name"), {
       target: { value: "Bench Press" },
@@ -38,7 +38,7 @@ describe("WorkoutForm", () => {
     await waitFor(() => {
       expect(onSubmit).toHaveBeenCalledWith({
         date: "2026-09-01",
-        workoutType: "UPPER",
+        workoutType: "UPPER_A",
         status: "PLANNED",
         notes: null,
         exercises: [
@@ -96,16 +96,42 @@ describe("WorkoutForm", () => {
     rerender(
       <WorkoutForm
         initialDate="2026-08-31"
-        scheduledWorkoutType="PUSH"
+        scheduledWorkoutType="LOWER_A"
         isSubmitting={false}
         fieldErrors={{}}
         onSubmit={vi.fn()}
         onDateChange={onDateChange}
       />,
     );
-    expect(screen.getByLabelText("Workout type")).toHaveValue("PUSH");
-    fireEvent.change(screen.getByLabelText("Workout type"), { target: { value: "UPPER" } });
+    expect(screen.getByLabelText("Workout type")).toHaveValue("LOWER_A");
+    fireEvent.change(screen.getByLabelText("Workout type"), { target: { value: "UPPER_B" } });
+    expect(screen.getByLabelText("Workout type")).toHaveValue("UPPER_B");
+  });
+
+  it("keeps a retired workout type available only while editing that record", () => {
+    const { rerender } = render(
+      <WorkoutForm
+        initialDate="2026-09-01"
+        initialWorkoutType="UPPER"
+        isSubmitting={false}
+        fieldErrors={{}}
+        onSubmit={vi.fn()}
+      />,
+    );
+
     expect(screen.getByLabelText("Workout type")).toHaveValue("UPPER");
+    expect(screen.getByRole("option", { name: "UPPER" })).toBeInTheDocument();
+
+    rerender(
+      <WorkoutForm
+        initialDate="2026-09-01"
+        isSubmitting={false}
+        fieldErrors={{}}
+        onSubmit={vi.fn()}
+      />,
+    );
+
+    expect(screen.queryByRole("option", { name: "UPPER" })).not.toBeInTheDocument();
   });
 
   it("keeps workout actions ordered and stacks them on narrow screens", () => {

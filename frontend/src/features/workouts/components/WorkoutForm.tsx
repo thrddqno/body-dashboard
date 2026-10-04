@@ -21,13 +21,19 @@ interface WorkoutFormProps {
   initialStatus?: WorkoutStatus;
   initialNotes?: string;
   initialExercises?: ExerciseFormValue[];
-  scheduledWorkoutType?: ScheduledWorkoutType;
+  scheduledWorkoutType?: string;
   isScheduleLoading?: boolean;
   onDateChange?: (date: string) => void;
 }
 
-const workoutTypes = ["PUSH", "PULL", "LEGS", "REST", "UPPER", "LOWER", "FULLBODY"] as const;
-type ScheduledWorkoutType = (typeof workoutTypes)[number];
+const workoutTypes = [
+  { value: "UPPER_A", label: "Upper A" },
+  { value: "LOWER_A", label: "Lower A" },
+  { value: "REST", label: "Rest" },
+  { value: "UPPER_B", label: "Upper B" },
+  { value: "LOWER_B", label: "Lower B" },
+  { value: "FULLBODY", label: "Full Body" },
+] as const;
 
 function createSet(): SetFormValue {
   return {
@@ -76,11 +82,15 @@ export function WorkoutForm({
   const isEditing = initialWorkoutType != null;
 
   const [date, setDate] = useState(initialDate);
-  const [workoutTypeOverride, setWorkoutTypeOverride] = useState<ScheduledWorkoutType | null>(null);
+  const [workoutTypeOverride, setWorkoutTypeOverride] = useState<string | null>(null);
   const workoutType = workoutTypeOverride
-    ?? (initialWorkoutType as ScheduledWorkoutType | undefined)
+    ?? initialWorkoutType
     ?? scheduledWorkoutType
-    ?? "PUSH";
+    ?? "UPPER_A";
+  const legacyWorkoutType = initialWorkoutType ?? scheduledWorkoutType;
+  const availableWorkoutTypes = legacyWorkoutType && !workoutTypes.some(({ value }) => value === legacyWorkoutType)
+    ? [{ value: legacyWorkoutType, label: legacyWorkoutType }, ...workoutTypes]
+    : workoutTypes;
   const [status, setStatus] = useState<WorkoutStatus>(initialStatus ?? "PLANNED");
   const [notes, setNotes] = useState(initialNotes ?? "");
   const [exercises, setExercises] = useState<ExerciseFormValue[]>(() => toFormExercises(initialExercises));
@@ -148,11 +158,11 @@ export function WorkoutForm({
             <label htmlFor="workout-type" className="form-label">
               <span className="form-label-text">Workout type</span>
               <select id="workout-type" value={workoutType} onChange={(event) => {
-                const nextType = event.target.value as ScheduledWorkoutType;
+                const nextType = event.target.value;
                 setWorkoutTypeOverride(nextType);
                 if (nextType === "REST") setExercises([]);
               }} className="form-control mt-2 font-normal" aria-invalid={Boolean(fieldErrors.workoutType)} aria-describedby={fieldErrors.workoutType ? "workout-type-error" : undefined}>
-                {workoutTypes.map((type) => <option key={type} value={type}>{type}</option>)}
+                {availableWorkoutTypes.map(({ value, label }) => <option key={value} value={value}>{label}</option>)}
               </select>
             </label>
             <FieldError id="workout-type-error" message={fieldErrors.workoutType} />

@@ -10,7 +10,7 @@ describe("WorkoutList", () => {
         <WorkoutList workouts={[{
           id: 42,
           date: "2026-09-01",
-          workoutType: "PUSH",
+          workoutType: "UPPER_A",
           status: "COMPLETED",
           notes: null,
           exercises: [],
@@ -20,7 +20,7 @@ describe("WorkoutList", () => {
       </MemoryRouter>,
     );
 
-    expect(screen.getByRole("link", { name: /PUSH/i })).toHaveAttribute("href", "/workouts/42");
+    expect(screen.getByRole("link", { name: /Upper A/i })).toHaveAttribute("href", "/workouts/42");
     expect(screen.queryByText("Open detail")).not.toBeInTheDocument();
   });
 
@@ -31,7 +31,7 @@ describe("WorkoutList", () => {
           {
             id: 1,
             date: "2026-09-01",
-            workoutType: "PUSH",
+            workoutType: "UPPER_A",
             status: "COMPLETED",
             notes: "Good session",
             exercises: [{

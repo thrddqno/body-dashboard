@@ -1,6 +1,7 @@
 export interface PlannedExercise {
   name: string;
   sets?: number;
+  setPrescription?: string;
   reps?: string;
   rir?: string;
   rest?: string;
@@ -20,5 +21,16 @@ export interface PlannedWorkout {
 export interface TrainingPlan extends PlannedWorkout {
   date: string;
   dayOfWeek: string;
-  workoutType: "PUSH" | "PULL" | "LEGS" | "REST" | "UPPER" | "LOWER" | "FULLBODY";
+  workoutType:
+    | "UPPER_A"
+    | "LOWER_A"
+    | "REST"
+    | "UPPER_B"
+    | "LOWER_B"
+    | "FULLBODY"
+    | "PUSH"
+    | "PULL"
+    | "LEGS"
+    | "UPPER"
+    | "LOWER";
 }

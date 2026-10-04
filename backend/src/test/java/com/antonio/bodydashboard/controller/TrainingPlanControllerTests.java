@@ -26,24 +26,25 @@ class TrainingPlanControllerTests {
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$.date").value("2026-09-01"))
 				.andExpect(jsonPath("$.dayOfWeek").value("TUESDAY"))
-				.andExpect(jsonPath("$.workoutType").value("PUSH"))
+				.andExpect(jsonPath("$.workoutType").value("LOWER_A"))
 				.andExpect(jsonPath("$.type").value("workout"))
-				.andExpect(jsonPath("$.title").value("Push"))
-				.andExpect(jsonPath("$.exercises", hasSize(5)))
-				.andExpect(jsonPath("$.exercises[0].name").value("Machine Chest Press"));
+				.andExpect(jsonPath("$.title").value("Lower A"))
+				.andExpect(jsonPath("$.exercises", hasSize(6)))
+				.andExpect(jsonPath("$.exercises[0].name").value("Leg Press"))
+				.andExpect(jsonPath("$.exercises[2].setPrescription").value("2-3 sets"));
 	}
 
 	@Test
 	void returnsCompleteTemplateForRequestedWorkoutType() throws Exception {
-		mockMvc.perform(get("/api/training-plans/2026-09-01").queryParam("workoutType", "upper"))
+		mockMvc.perform(get("/api/training-plans/2026-09-01").queryParam("workoutType", "upper_b"))
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$.date").value("2026-09-01"))
 				.andExpect(jsonPath("$.dayOfWeek").value("TUESDAY"))
-				.andExpect(jsonPath("$.workoutType").value("UPPER"))
-				.andExpect(jsonPath("$.title").value("Upper"))
-				.andExpect(jsonPath("$.subtitle").value("Upper body plus skill practice"))
-				.andExpect(jsonPath("$.warmup", hasSize(2)))
-				.andExpect(jsonPath("$.exercises", hasSize(7)))
+				.andExpect(jsonPath("$.workoutType").value("UPPER_B"))
+				.andExpect(jsonPath("$.title").value("Upper B"))
+				.andExpect(jsonPath("$.subtitle").value("Upper body strength"))
+				.andExpect(jsonPath("$.warmup", hasSize(0)))
+				.andExpect(jsonPath("$.exercises", hasSize(8)))
 				.andExpect(jsonPath("$.exercises[1].name").value("Seated Cable Row"));
 	}
 
@@ -73,16 +74,46 @@ class TrainingPlanControllerTests {
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$.dayOfWeek").value("TUESDAY"))
 				.andExpect(jsonPath("$.workoutType").value("REST"))
-				.andExpect(jsonPath("$.subtitle").value("Recovery day"));
+				.andExpect(jsonPath("$.subtitle").value("Onsite workday"));
 	}
 
 	@Test
-	void returnsRestPlanForMonday() throws Exception {
-		mockMvc.perform(get("/api/training-plans/2026-09-07"))
+	void returnsRestPlanForThursday() throws Exception {
+		mockMvc.perform(get("/api/training-plans/2026-09-03"))
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$.workoutType").value("REST"))
 				.andExpect(jsonPath("$.type").value("rest"))
-				.andExpect(jsonPath("$.optional", hasSize(3)));
+				.andExpect(jsonPath("$.subtitle").value("Recovery day"))
+				.andExpect(jsonPath("$.optional", hasSize(0)));
+	}
+
+	@Test
+	void returnsRestPlansForWednesdayThroughFriday() throws Exception {
+		for (String date : new String[] { "2026-09-02", "2026-09-03", "2026-09-04" }) {
+			mockMvc.perform(get("/api/training-plans/{date}", date))
+					.andExpect(status().isOk())
+					.andExpect(jsonPath("$.workoutType").value("REST"))
+					.andExpect(jsonPath("$.type").value("rest"));
+		}
+	}
+
+	@Test
+	void returnsLowerBAlternativesAndBackDiscomfortRule() throws Exception {
+		mockMvc.perform(get("/api/training-plans/2026-09-06"))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.workoutType").value("LOWER_B"))
+				.andExpect(jsonPath("$.exercises[0].notes").value("Hack Squat may be used instead."))
+				.andExpect(jsonPath("$.exercises[3].notes").value(
+						"Romanian Deadlift is optional when your back is comfortable. Use Hip Thrust Machine instead if you report back discomfort."))
+				.andExpect(jsonPath("$.optional[0]").value("10-20 minutes easy cardio"));
+	}
+
+	@Test
+	void usesCurrentScheduleForRetiredWorkoutTypeOverride() throws Exception {
+		mockMvc.perform(get("/api/training-plans/2026-09-01").queryParam("workoutType", "upper"))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.workoutType").value("LOWER_A"))
+				.andExpect(jsonPath("$.title").value("Lower A"));
 	}
 
 	@Test
