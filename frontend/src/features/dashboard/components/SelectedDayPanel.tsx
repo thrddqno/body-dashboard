@@ -23,9 +23,9 @@ export function SelectedDayPanel({
   planError,
 }: SelectedDayPanelProps) {
   const hasWorkouts = workouts.length > 0;
-  const hasPlannedWorkout = workouts.some(
-    (workout) => workout.status === "PLANNED",
-  );
+  const plannedWorkout = workouts
+    .filter((workout) => workout.status === "PLANNED")
+    .sort((left, right) => right.createdAt.localeCompare(left.createdAt))[0];
 
   return (
     <section className="panel p-6">
@@ -49,15 +49,16 @@ export function SelectedDayPanel({
           <>
             <WorkoutList workouts={workouts} />
 
-            {plan && hasPlannedWorkout && plan.type !== "rest" && (
+            {plan && plannedWorkout && plan.type !== "rest" && (
               <PlannedWorkoutView
                 date={selectedDate}
                 plan={plan}
+                plannedWorkoutId={plannedWorkout.id}
                 canSavePng={selectedDate === today}
               />
             )}
 
-            {plan?.type === "rest" && hasPlannedWorkout && (
+            {plan?.type === "rest" && plannedWorkout && (
               <RestDayView date={selectedDate} plan={plan} />
             )}
 

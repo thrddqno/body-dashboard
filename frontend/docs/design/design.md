@@ -124,7 +124,7 @@ Exercise detail rows are grid-based on desktop and collapse on mobile. If sets, 
 
 ### Weekly Trends
 
-Weekly trends render as a two-column grid of chart panels at 900px and above, collapsing to one column below that breakpoint. Each panel keeps the compact card language. The calorie panel keeps its Y-axis fixed at the configured daily calorie target; days over target are drawn as a target-sized two-segment bar with a green in-target portion and an orange surplus portion, so the scale always reads to the target while surplus remains visible. Chart headings use the serif display face, and panels with no recorded values show unframed muted text.
+Weekly trends render as a two-column grid of chart panels at 900px and above, collapsing to one column below that breakpoint. Each panel keeps the compact card language. The calorie panel keeps its Y-axis fixed at the configured daily calorie target; above-target days use orange for the actual surplus and green to fill the remaining target-scale height. Exact totals remain available in the tooltip and accessible table. The weight panel connects recent measurements in chronological order rather than inserting empty daily slots. Chart headings use the serif display face, and panels with no recorded values show unframed muted text.
 
 ## Responsive Behavior
 

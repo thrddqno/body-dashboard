@@ -106,7 +106,10 @@ describe("WeeklyTrendsChart", () => {
           dailyLog({ date: "2026-08-31", sleepMinutes: 480, estimatedCalories: 2450 }),
           dailyLog({ date: "2026-09-02", sleepMinutes: 360, steps: 6400, estimatedCalories: 2700 }),
         ]}
-        bodyMetrics={[bodyMetric({ date: "2026-09-01", weightKg: 79.2 })]}
+        bodyMetrics={[
+          bodyMetric({ id: 1, date: "2026-08-24", weightKg: 79.8 }),
+          bodyMetric({ id: 2, date: "2026-09-01", weightKg: 79.2 }),
+        ]}
         periodStart={periodStart}
         periodEnd={periodEnd}
         calorieBaselineKcal={calorieBaselineKcal}
@@ -117,14 +120,14 @@ describe("WeeklyTrendsChart", () => {
     const names = charts.map((chart) => chart.getAttribute("aria-label"));
 
     expect(names).toEqual([
-      "Weekly weight trend",
+      "Recent weight trend",
       "Weekly Sleep trend",
       "Weekly Steps trend",
       "Weekly Calories trend",
     ]);
 
     const expectedDates = "2026-08-31,2026-09-01,2026-09-02,2026-09-03,2026-09-04,2026-09-05,2026-09-06";
-    for (const chart of charts) {
+    for (const chart of charts.filter((chart) => chart.getAttribute("aria-label") !== "Recent weight trend")) {
       expect(chart).toHaveAttribute("data-dates", expectedDates);
     }
 
@@ -139,13 +142,16 @@ describe("WeeklyTrendsChart", () => {
     expect(sleepRows.find((row) => row.date === "2026-09-02")?.sleepHours).toBe(6);
     expect(sleepRows.find((row) => row.date === "2026-09-03")?.sleepHours).toBeNull();
 
-    const weightChart = screen.getByRole("img", { name: "Weekly weight trend" });
+    const weightChart = screen.getByRole("img", { name: "Recent weight trend" });
     const weightRows = JSON.parse(weightChart.getAttribute("data-values") ?? "") as Array<{
       date: string;
       weightKg: number | null;
     }>;
-    expect(weightRows.find((row) => row.date === "2026-09-01")?.weightKg).toBe(79.2);
-    expect(weightRows.find((row) => row.date === "2026-08-31")?.weightKg).toBeNull();
+    expect(weightRows).toEqual([
+      { date: "2026-08-24", weightKg: 79.8 },
+      { date: "2026-09-01", weightKg: 79.2 },
+    ]);
+    expect(screen.getByRole("table", { name: "Recent weight entries" })).toBeInTheDocument();
 
     const caloriesChart = screen.getByRole("img", { name: "Weekly Calories trend" });
     const caloriesRows = JSON.parse(caloriesChart.getAttribute("data-values") ?? "") as Array<{
@@ -171,7 +177,7 @@ describe("WeeklyTrendsChart", () => {
     expect(screen.getAllByTestId("trend-bar").map((bar) => bar.textContent)).toEqual([
       "Sleep (sleepHours)",
       "Steps (steps)",
-      "In-target intake (caloriesBase)",
+      "Target-scale base (caloriesBase)",
       "Surplus (caloriesOverlay)",
     ]);
     expect(screen.getAllByTestId("trend-line").map((line) => line.textContent)).toEqual(["Weight (weightKg)"]);
@@ -231,10 +237,11 @@ describe("WeeklyTrendsChart", () => {
     });
 
     expect(screen.getByText(/fixed 2,500 kcal target scale/)).toBeInTheDocument();
-    expect(screen.getByText(/target-sized bar whose green part shows the in-target intake and orange part the surplus/)).toBeInTheDocument();
+    expect(screen.getByText(/Above target, orange is the surplus and green fills the remaining target-scale height/)).toBeInTheDocument();
     expect(screen.getByText(/The largest surplus is 200 kcal\./)).toBeInTheDocument();
-    expect(screen.getByText("In-target intake")).toBeInTheDocument();
-    expect(screen.getByText("Surplus")).toBeInTheDocument();
+    expect(screen.getByText("Target-scale base")).toBeInTheDocument();
+    expect(screen.getAllByText("Surplus")).toHaveLength(2);
+    expect(screen.getByRole("table", { name: "Recorded calorie totals and surplus by day" })).toBeInTheDocument();
   });
 
   it("clamps an unusually large surplus so the stacked bar never exceeds the target", () => {
@@ -265,6 +272,38 @@ describe("WeeklyTrendsChart", () => {
     });
   });
 
+  it("extends the sleep scale when a recorded entry exceeds 12 hours", () => {
+    render(
+      <WeeklyTrendsChart
+        dailyLogs={[dailyLog({ sleepMinutes: 780 })]}
+        bodyMetrics={[]}
+        periodStart={periodStart}
+        periodEnd={periodEnd}
+        calorieBaselineKcal={calorieBaselineKcal}
+      />,
+    );
+
+    expect(
+      within(screen.getByRole("img", { name: "Weekly Sleep trend" })).getByTestId("y-axis"),
+    ).toHaveAttribute("data-domain", "0,13");
+  });
+
+  it("shows a recorded value instead of a floating point when only one weight entry exists", () => {
+    render(
+      <WeeklyTrendsChart
+        dailyLogs={[]}
+        bodyMetrics={[bodyMetric({ date: "2026-09-01", weightKg: 79.2 })]}
+        periodStart={periodStart}
+        periodEnd={periodEnd}
+        calorieBaselineKcal={calorieBaselineKcal}
+      />,
+    );
+
+    expect(screen.getByText("79.2 kg")).toBeInTheDocument();
+    expect(screen.getByText(/Add another measurement to show a trend/)).toBeInTheDocument();
+    expect(screen.queryByRole("img", { name: "Recent weight trend" })).not.toBeInTheDocument();
+  });
+
   it("shows a fallback panel when a metric has no values for the week", () => {
     render(
       <WeeklyTrendsChart
@@ -277,8 +316,8 @@ describe("WeeklyTrendsChart", () => {
     );
 
     expect(screen.getByRole("img", { name: "Weekly Sleep trend" })).toBeInTheDocument();
-    expect(screen.queryByRole("img", { name: "Weekly weight trend" })).not.toBeInTheDocument();
-    expect(screen.getByText("No weight measurements recorded this week.")).toBeInTheDocument();
+    expect(screen.queryByRole("img", { name: "Recent weight trend" })).not.toBeInTheDocument();
+    expect(screen.getByText("No weight measurements recorded.")).toBeInTheDocument();
     expect(screen.getByText("No calories recorded this week.")).toBeInTheDocument();
     expect(screen.getByText("No steps recorded this week.")).toBeInTheDocument();
   });
@@ -298,20 +337,21 @@ describe("WeeklyTrendsChart", () => {
     expect(screen.queryByRole("img")).not.toBeInTheDocument();
   });
 
-  it("shows an unavailable message instead of charts when the trend data failed to load", () => {
+  it("keeps weight visible when daily trend data failed to load", () => {
     render(
       <WeeklyTrendsChart
         dailyLogs={[]}
-        bodyMetrics={[]}
+        bodyMetrics={[bodyMetric({ date: "2026-08-24" }), bodyMetric({ id: 2, date: "2026-09-01" })]}
         periodStart={periodStart}
         periodEnd={periodEnd}
         calorieBaselineKcal={calorieBaselineKcal}
-        error="Weekly trends are temporarily unavailable."
+        error="Sleep, steps, and calorie data could not be loaded."
       />,
     );
 
-    expect(screen.getByText("Weekly trends are temporarily unavailable")).toBeInTheDocument();
-    expect(screen.getByText("Weekly trends are temporarily unavailable.")).toBeInTheDocument();
-    expect(screen.queryByRole("img")).not.toBeInTheDocument();
+    expect(screen.getByText("Daily trends are temporarily unavailable")).toBeInTheDocument();
+    expect(screen.getByText("Sleep, steps, and calorie data could not be loaded.")).toBeInTheDocument();
+    expect(screen.getByRole("img", { name: "Recent weight trend" })).toBeInTheDocument();
+    expect(screen.queryByRole("img", { name: "Weekly Calories trend" })).not.toBeInTheDocument();
   });
 });

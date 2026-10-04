@@ -9,7 +9,6 @@ const mocks = vi.hoisted(() => ({
   getLatestWeeklyAiAnalysis: vi.fn(),
   getTrainingPlan: vi.fn(),
   getWeeklyAnalytics: vi.fn(),
-  listBodyMetricsInRange: vi.fn(),
   listWorkoutPage: vi.fn(),
   listWorkoutsByDateRange: vi.fn(),
 }));
@@ -30,10 +29,6 @@ vi.mock("@/api/dailyLogsApi", () => ({
   getDailyLogsInRange: (...args: unknown[]) => mocks.getDailyLogsInRange(...args),
 }));
 
-vi.mock("@/api/bodyMetricsApi", () => ({
-  listBodyMetricsInRange: (...args: unknown[]) => mocks.listBodyMetricsInRange(...args),
-}));
-
 vi.mock("@/api/trainingPlansApi", () => ({
   getTrainingPlan: (...args: unknown[]) => mocks.getTrainingPlan(...args),
 }));
@@ -50,15 +45,25 @@ vi.mock("@/features/dashboard/components/SelectedDayPanel", () => ({ SelectedDay
 vi.mock("@/features/dashboard/components/WeeklyCalendar", () => ({ WeeklyCalendar: () => null }));
 vi.mock("@/features/dashboard/components/WeeklySummary", () => ({ WeeklySummary: () => null }));
 vi.mock("@/features/dashboard/components/WeeklyTrendsChart", () => ({
-  WeeklyTrendsChart: ({ error }: { error?: string }) =>
-    error ? <div>Weekly trends are temporarily unavailable</div> : null,
+  WeeklyTrendsChart: ({
+    bodyMetrics,
+    error,
+  }: {
+    bodyMetrics: Array<{ date: string }>;
+    error?: string;
+  }) =>
+    error ? (
+      <div>Daily trends are temporarily unavailable</div>
+    ) : (
+      <div data-testid="trend-metric-dates">{bodyMetrics.map((metric) => metric.date).join(",")}</div>
+    ),
 }));
 
 function workout(id: number) {
   return {
     id,
     date: `2026-08-${String(id).padStart(2, "0")}`,
-    workoutType: "PUSH",
+    workoutType: "LOWER_A",
     status: "COMPLETED" as const,
     notes: null,
     exercises: [],
@@ -88,7 +93,24 @@ describe("DashboardPage workout history", () => {
           minWeightLossKgPerWeek: 0.3,
           maxWeightLossKgPerWeek: 0.7,
         },
-        recentMetrics: [],
+        recentMetrics: [
+          {
+            id: 1,
+            date: "2026-08-24",
+            weightKg: 79.8,
+            waistCm: null,
+            bodyFatPercentage: null,
+            createdAt: "2026-08-24T08:00:00",
+          },
+          {
+            id: 2,
+            date: "2026-08-31",
+            weightKg: 79.2,
+            waistCm: null,
+            bodyFatPercentage: null,
+            createdAt: "2026-08-31T08:00:00",
+          },
+        ],
       },
       training: {},
     });
@@ -96,14 +118,13 @@ describe("DashboardPage workout history", () => {
       period: { start: "2026-08-31", end: "2026-09-06" },
     });
     mocks.getDailyLogsInRange.mockResolvedValue([]);
-    mocks.listBodyMetricsInRange.mockResolvedValue([]);
     mocks.getLatestWeeklyAiAnalysis.mockResolvedValue(null);
     mocks.getTrainingPlan.mockResolvedValue({
       date: "2026-08-31",
       dayOfWeek: "Monday",
-      workoutType: "PUSH",
+      workoutType: "UPPER_A",
       type: "workout",
-      title: "Push",
+      title: "Upper A",
       subtitle: "",
       warmup: [],
       exercises: [],
@@ -127,6 +148,7 @@ describe("DashboardPage workout history", () => {
     );
 
     expect(await screen.findByText("Page 1 of 3 · 18 workouts")).toBeInTheDocument();
+    expect(screen.getByTestId("trend-metric-dates")).toHaveTextContent("2026-08-24,2026-08-31");
     expect(mocks.listWorkoutsByDateRange).toHaveBeenCalledWith(
       "2026-08-31",
       "2026-09-06",
@@ -164,8 +186,6 @@ describe("DashboardPage workout history", () => {
 
   it("renders the dashboard when weekly trend requests fail", async () => {
     mocks.getDailyLogsInRange.mockRejectedValue(new Error("Trends unavailable"));
-    mocks.listBodyMetricsInRange.mockRejectedValue(new Error("Trends unavailable"));
-    mocks.listWorkoutsByDateRange.mockRejectedValue(new Error("Trends unavailable"));
 
     render(
       <MemoryRouter>
@@ -175,8 +195,9 @@ describe("DashboardPage workout history", () => {
 
     expect(await screen.findByText("Page 1 of 3 · 18 workouts")).toBeInTheDocument();
     expect(
-      await screen.findByText("Weekly trends are temporarily unavailable"),
+      await screen.findByText("Daily trends are temporarily unavailable"),
     ).toBeInTheDocument();
+    expect(mocks.listWorkoutsByDateRange).toHaveBeenCalledTimes(1);
     expect(mocks.getDashboard).toHaveBeenCalledTimes(1);
   });
 });

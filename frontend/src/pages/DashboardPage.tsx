@@ -7,7 +7,6 @@ import { ApiError } from "@/api/httpClient";
 import { listWorkoutPage, listWorkoutsByDateRange } from "@/api/workoutsApi";
 import { getTrainingPlan } from "@/api/trainingPlansApi";
 import { getDailyLogsInRange } from "@/api/dailyLogsApi";
-import { listBodyMetricsInRange } from "@/api/bodyMetricsApi";
 import { ErrorState } from "@/components/ErrorState";
 import { LoadingState } from "@/components/LoadingState";
 import { CoachNotes } from "@/features/dashboard/components/CoachNotes";
@@ -22,7 +21,6 @@ import type { WeeklyAnalytics } from "@/types/analytics";
 import type { WeeklyAiAnalysis } from "@/types/aiAnalysis";
 import type { DashboardResponse } from "@/types/dashboard";
 import type { DailyLog } from "@/types/dailyLog";
-import type { BodyMetric } from "@/types/bodyMetric";
 import type { Workout } from "@/types/workout";
 import type { TrainingPlan } from "@/types/plannedWorkout";
 import { getWeekDates } from "@/utils/dates";
@@ -33,7 +31,6 @@ export function DashboardPage() {
   const [analytics, setAnalytics] = useState<WeeklyAnalytics | null>(null);
   const [workouts, setWorkouts] = useState<Workout[]>([]);
   const [dailyLogs, setDailyLogs] = useState<DailyLog[]>([]);
-  const [bodyMetrics, setBodyMetrics] = useState<BodyMetric[]>([]);
   const [workoutHistory, setWorkoutHistory] = useState<Workout[]>([]);
   const [workoutHistoryPage, setWorkoutHistoryPage] = useState(0);
   const [workoutHistoryPageSize, setWorkoutHistoryPageSize] = useState(7);
@@ -72,7 +69,7 @@ export function DashboardPage() {
 
         if (controller.signal.aborted) return;
 
-        const [workoutsForWeek, weeklyDailyLogs, weeklyBodyMetrics] = await Promise.all([
+        const [workoutsResult, dailyLogsResult] = await Promise.allSettled([
           listWorkoutsByDateRange(
             analyticsResponse.period.start,
             analyticsResponse.period.end,
@@ -83,19 +80,20 @@ export function DashboardPage() {
             analyticsResponse.period.end,
             controller.signal,
           ),
-          listBodyMetricsInRange(
-            analyticsResponse.period.start,
-            analyticsResponse.period.end,
-            controller.signal,
-          ),
-        ]).catch(() => {
-          setTrendsError("Weekly trends are temporarily unavailable.");
-          return [[], [], []] as [Workout[], DailyLog[], BodyMetric[]];
-        });
+        ]);
 
-        setWorkouts(workoutsForWeek);
-        setDailyLogs(weeklyDailyLogs);
-        setBodyMetrics(weeklyBodyMetrics);
+        if (controller.signal.aborted) return;
+        if (workoutsResult.status === "rejected") {
+          throw workoutsResult.reason;
+        }
+
+        setWorkouts(workoutsResult.value);
+        if (dailyLogsResult.status === "fulfilled") {
+          setDailyLogs(dailyLogsResult.value);
+        } else {
+          setTrendsError("Sleep, steps, and calorie data could not be loaded.");
+          setDailyLogs([]);
+        }
       } catch (loadError) {
         if (loadError instanceof Error && loadError.name === "AbortError") {
           return;
@@ -237,7 +235,7 @@ export function DashboardPage() {
       <div className="mt-6">
         <WeeklyTrendsChart
           dailyLogs={dailyLogs}
-          bodyMetrics={bodyMetrics}
+          bodyMetrics={dashboard.body.recentMetrics}
           periodStart={analytics.period.start}
           periodEnd={analytics.period.end}
           calorieBaselineKcal={dashboard.body.goal.calorieTargetKcal}

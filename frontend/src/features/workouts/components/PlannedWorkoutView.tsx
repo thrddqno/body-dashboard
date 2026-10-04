@@ -10,10 +10,16 @@ import { Link } from "react-router-dom";
 interface PlannedWorkoutViewProps {
   date: string;
   plan: PlannedWorkout;
+  plannedWorkoutId?: number;
   canSavePng?: boolean;
 }
 
-export function PlannedWorkoutView({ date, plan, canSavePng = false }: PlannedWorkoutViewProps) {
+export function PlannedWorkoutView({
+  date,
+  plan,
+  plannedWorkoutId,
+  canSavePng = false,
+}: PlannedWorkoutViewProps) {
   const imageRef = useRef<HTMLDivElement>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState<string>();
@@ -66,10 +72,10 @@ export function PlannedWorkoutView({ date, plan, canSavePng = false }: PlannedWo
             </button>
           ) : null}
           <Link
-            to="/workouts/"
+            to={plannedWorkoutId == null ? "/workouts/" : `/workouts/${plannedWorkoutId}`}
             className="button-secondary"
           >
-            Log Workout
+            {plannedWorkoutId == null ? "Log Workout" : "Edit Workout"}
           </Link>
         </div>
       </div>

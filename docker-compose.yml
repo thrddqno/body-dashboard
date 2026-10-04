@@ -3,6 +3,7 @@ services:
     build:
       context: ./frontend
     container_name: body-dashboard-frontend
+    restart: unless-stopped
     depends_on:
       - backend
     ports:
@@ -12,6 +13,7 @@ services:
     build:
       context: ./backend
     container_name: body-dashboard-backend
+    restart: unless-stopped
     depends_on:
       postgres:
         condition: service_healthy
@@ -36,6 +38,7 @@ services:
   postgres:
     image: postgres:16-alpine
     container_name: body-dashboard-postgres
+    restart: unless-stopped
     environment:
       POSTGRES_DB: body_dashboard
       POSTGRES_USER: body_dashboard

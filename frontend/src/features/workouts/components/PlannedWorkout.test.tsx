@@ -8,67 +8,28 @@ import type { Workout } from "@/types/workout";
 const plans: Record<string, PlannedWorkout> = {
   "2026-09-01": {
     type: "workout",
-    title: "Push",
-    subtitle: "Chest, shoulders, triceps",
-    warmup: ["5 min easy treadmill or bike"],
+    title: "Lower A",
+    subtitle: "Lower body strength and core",
+    warmup: [],
     exercises: [
-      { name: "Machine Chest Press", sets: 2, reps: "6–10", rir: "3–4", rest: "2 min" },
-      { name: "Incline Dumbbell Press", sets: 2, reps: "8–12", rir: "3–4", rest: "2 min" },
-      { name: "Seated Machine Shoulder Press", sets: 2, reps: "8–12", rir: "3", rest: "90 sec" },
-      { name: "Cable or Machine Lateral Raise", sets: 2, reps: "12–18", rir: "3", rest: "60 sec" },
-      { name: "Rope Pressdown", sets: 2, reps: "10–15", rir: "3", rest: "60 sec" },
+      { name: "Leg Press", setPrescription: "3 sets" },
+      { name: "Seated Leg Curl", setPrescription: "3 sets" },
+      { name: "Supported Split Squat", setPrescription: "2-3 sets" },
+      { name: "Hip Thrust Machine", setPrescription: "3 sets" },
+      { name: "Calf Raise", setPrescription: "3 sets" },
+      { name: "Pallof Press", setPrescription: "2-3 sets" },
     ],
-    guardrails: ["First ramp week stays at 2 work sets."],
+    guardrails: ["Keep technique controlled.", "Avoid grinding reps."],
   },
   "2026-09-02": {
-    type: "workout",
-    title: "Pull",
-    subtitle: "Back, rear delts, biceps",
-    warmup: [],
-    exercises: [{
-      name: "Lat Pulldown",
-      sets: 2,
-      reps: "8–12",
-      rir: "3–4",
-      rest: "2 min",
-      notes: "Pause near chest. Avoid turning it into a lean-back pull.",
-    }],
-    guardrails: [],
-  },
-  "2026-09-03": {
-    type: "workout",
-    title: "Legs + Core",
-    subtitle: "Stable lower body and core",
-    warmup: [],
-    exercises: [],
-    guardrails: [],
-  },
-  "2026-09-04": {
     type: "rest",
     title: "Rest",
-    subtitle: "Recovery / sleep protection",
+    subtitle: "Onsite workday",
     warmup: [],
     exercises: [],
-    guardrails: ["This is a recovery day, not a missed lifting slot."],
-    optional: ["Easy walk after work"],
+    guardrails: ["This is an intentional rest day."],
   },
-  "2026-09-05": {
-    type: "workout",
-    title: "Upper",
-    subtitle: "Upper body plus skill practice",
-    warmup: ["Light row and press ramp-up sets"],
-    exercises: [{ name: "Seated Cable Row", sets: 2, reps: "8–12", rir: "3", rest: "2 min" }],
-    guardrails: ["Keep skill reps crisp."],
-  },
-  "2026-09-06": {
-    type: "workout",
-    title: "Lower",
-    subtitle: "Lower body strength and controlled movement",
-    warmup: [],
-    exercises: [],
-    guardrails: [],
-  },
-  "2026-09-07": {
+  "2026-09-03": {
     type: "rest",
     title: "Rest",
     subtitle: "Recovery day",
@@ -76,16 +37,73 @@ const plans: Record<string, PlannedWorkout> = {
     exercises: [],
     guardrails: ["This is an intentional rest day."],
   },
+  "2026-09-04": {
+    type: "rest",
+    title: "Rest",
+    subtitle: "Onsite workday",
+    warmup: [],
+    exercises: [],
+    guardrails: ["This is an intentional rest day."],
+  },
+  "2026-09-05": {
+    type: "workout",
+    title: "Upper B",
+    subtitle: "Upper body strength",
+    warmup: [],
+    exercises: [
+      { name: "Incline Dumbbell Press", setPrescription: "3 sets" },
+      { name: "Seated Cable Row", setPrescription: "3 sets" },
+      { name: "Neutral-Grip Pulldown", setPrescription: "3 sets" },
+      { name: "Seated Machine Shoulder Press", setPrescription: "2-3 sets" },
+      { name: "Reverse Pec Deck", setPrescription: "3 sets" },
+      { name: "Lateral Raise", setPrescription: "2 sets" },
+      { name: "Rope Pressdown", setPrescription: "2 sets" },
+      { name: "Cable Curl", setPrescription: "2 sets" },
+    ],
+    guardrails: [],
+  },
+  "2026-09-06": {
+    type: "workout",
+    title: "Lower B",
+    subtitle: "Lower body strength and core",
+    warmup: [],
+    exercises: [{
+      name: "Hip Thrust Machine",
+      setPrescription: "2-3 sets",
+      notes: "Romanian Deadlift is optional when your back is comfortable. Use Hip Thrust Machine instead if you report back discomfort.",
+    }],
+    guardrails: ["Do not use Romanian Deadlifts when back discomfort is present."],
+    optional: ["10-20 minutes easy cardio"],
+  },
+  "2026-09-07": {
+    type: "workout",
+    title: "Upper A",
+    subtitle: "Upper body strength",
+    warmup: [],
+    exercises: [
+      { name: "Machine Chest Press", setPrescription: "3 sets" },
+      { name: "Chest-Supported Row", setPrescription: "3 sets" },
+      { name: "Incline Dumbbell Press", setPrescription: "3 sets" },
+      { name: "Lat Pulldown", setPrescription: "3 sets" },
+      { name: "Lateral Raise", setPrescription: "3 sets" },
+      { name: "Rope Pressdown", setPrescription: "2 sets" },
+      { name: "Cable Curl", setPrescription: "2 sets" },
+    ],
+    guardrails: [
+      "Generally keep 1-3 reps in reserve on working sets.",
+      "Prioritize clean technique and progressive overload.",
+    ],
+  },
 };
 
 const planMetadata: Record<string, Pick<TrainingPlan, "dayOfWeek" | "workoutType">> = {
-  "2026-09-01": { dayOfWeek: "TUESDAY", workoutType: "PUSH" },
-  "2026-09-02": { dayOfWeek: "WEDNESDAY", workoutType: "PULL" },
-  "2026-09-03": { dayOfWeek: "THURSDAY", workoutType: "LEGS" },
+  "2026-09-01": { dayOfWeek: "TUESDAY", workoutType: "LOWER_A" },
+  "2026-09-02": { dayOfWeek: "WEDNESDAY", workoutType: "REST" },
+  "2026-09-03": { dayOfWeek: "THURSDAY", workoutType: "REST" },
   "2026-09-04": { dayOfWeek: "FRIDAY", workoutType: "REST" },
-  "2026-09-05": { dayOfWeek: "SATURDAY", workoutType: "UPPER" },
-  "2026-09-06": { dayOfWeek: "SUNDAY", workoutType: "LOWER" },
-  "2026-09-07": { dayOfWeek: "MONDAY", workoutType: "REST" },
+  "2026-09-05": { dayOfWeek: "SATURDAY", workoutType: "UPPER_B" },
+  "2026-09-06": { dayOfWeek: "SUNDAY", workoutType: "LOWER_B" },
+  "2026-09-07": { dayOfWeek: "MONDAY", workoutType: "UPPER_A" },
 };
 
 function getPlannedWorkout(date: string): TrainingPlan {
@@ -95,19 +113,10 @@ function getPlannedWorkout(date: string): TrainingPlan {
 const completedWorkout: Workout = {
   id: 1,
   date: "2026-09-01",
-  workoutType: "Push",
+  workoutType: "LOWER_A",
   status: "COMPLETED",
   notes: "Felt strong today",
-  exercises: [
-    {
-      id: 1,
-      exerciseName: "Bench Press",
-      orderIndex: 1,
-      sets: [
-        { id: 1, setNumber: 1, weightKg: 80, reps: 8, rir: 2, warmup: false },
-      ],
-    },
-  ],
+  exercises: [],
   createdAt: "2026-09-01T08:00:00",
   updatedAt: "2026-09-01T08:00:00",
 };
@@ -134,232 +143,87 @@ describe("Planned workout fallback", () => {
     vi.useRealTimers();
   });
 
-  describe("weekday resolution", () => {
-    it("resolves Tuesday to Push plan", () => {
-      const plan = getPlannedWorkout("2026-09-01");
-      expect(plan.title).toBe("Push");
-      expect(plan.type).toBe("workout");
-      expect(plan.subtitle).toBe("Chest, shoulders, triceps");
-    });
-
-    it("resolves Wednesday to Pull plan", () => {
-      const plan = getPlannedWorkout("2026-09-02");
-      expect(plan.title).toBe("Pull");
-      expect(plan.type).toBe("workout");
-      expect(plan.subtitle).toBe("Back, rear delts, biceps");
-    });
-
-    it("resolves Thursday to Legs + Core plan", () => {
-      const plan = getPlannedWorkout("2026-09-03");
-      expect(plan.title).toBe("Legs + Core");
-      expect(plan.type).toBe("workout");
-      expect(plan.subtitle).toBe("Stable lower body and core");
-    });
-
-    it("resolves Friday to Rest", () => {
-      const plan = getPlannedWorkout("2026-09-04");
-      expect(plan.title).toBe("Rest");
-      expect(plan.type).toBe("rest");
-      expect(plan.subtitle).toBe("Recovery / sleep protection");
-    });
-
-    it("resolves Saturday to Upper plan", () => {
-      const plan = getPlannedWorkout("2026-09-05");
-      expect(plan.title).toBe("Upper");
-      expect(plan.type).toBe("workout");
-      expect(plan.subtitle).toBe("Upper body plus skill practice");
-    });
-
-    it("resolves Sunday to Lower plan", () => {
-      const plan = getPlannedWorkout("2026-09-06");
-      expect(plan.title).toBe("Lower");
-      expect(plan.type).toBe("workout");
-      expect(plan.subtitle).toBe("Lower body strength and controlled movement");
-    });
-
-    it("resolves Monday to Rest", () => {
-      const plan = getPlannedWorkout("2026-09-07");
-      expect(plan.title).toBe("Rest");
-      expect(plan.type).toBe("rest");
-      expect(plan.subtitle).toBe("Recovery day");
-    });
+  it.each([
+    ["2026-09-01", "Lower A", "workout"],
+    ["2026-09-02", "Rest", "rest"],
+    ["2026-09-03", "Rest", "rest"],
+    ["2026-09-04", "Rest", "rest"],
+    ["2026-09-05", "Upper B", "workout"],
+    ["2026-09-06", "Lower B", "workout"],
+    ["2026-09-07", "Upper A", "workout"],
+  ])("resolves %s to %s", (date, title, type) => {
+    const plan = getPlannedWorkout(date);
+    expect(plan.title).toBe(title);
+    expect(plan.type).toBe(type);
   });
 
-  describe("logged workout overrides plan", () => {
-    it("shows logged workout instead of planned workout", () => {
-      renderPanel("2026-09-01", [completedWorkout]);
+  it("shows a completed workout instead of the planned workout", () => {
+    renderPanel("2026-09-01", [completedWorkout]);
 
-      expect(screen.getByText("Push")).toBeInTheDocument();
-      expect(screen.getByText("Felt strong today")).toBeInTheDocument();
-      expect(screen.queryByText("Today's Plan")).not.toBeInTheDocument();
-      expect(screen.queryByText("PLANNED WORKOUT")).not.toBeInTheDocument();
-    });
+    expect(screen.getByText("Lower A")).toBeInTheDocument();
+    expect(screen.getByText("Felt strong today")).toBeInTheDocument();
+    expect(screen.queryByText("Today's Plan")).not.toBeInTheDocument();
   });
 
-  describe("planned workout display", () => {
-    it("renders Push plan when no workout logged on Tuesday", () => {
-      renderPanel("2026-09-01");
+  it("renders a complete workout plan with exact set prescriptions", () => {
+    renderPanel("2026-09-07");
 
-      expect(screen.getByText("Today's Plan")).toBeInTheDocument();
-      expect(screen.getByText("Push")).toBeInTheDocument();
-      expect(screen.getByText("Chest, shoulders, triceps")).toBeInTheDocument();
-    });
-
-    it("labels a future workout plan with its weekday", () => {
-      renderPanel("2026-09-03");
-
-      expect(screen.getByText("Thursday's Plan")).toBeInTheDocument();
-    });
-
-    it("renders Pull plan when no workout logged on Wednesday", () => {
-      renderPanel("2026-09-02");
-
-      expect(screen.getByText("Pull")).toBeInTheDocument();
-      expect(screen.getByText("Back, rear delts, biceps")).toBeInTheDocument();
-    });
-
-    it("renders Legs + Core plan when no workout logged on Thursday", () => {
-      renderPanel("2026-09-03");
-
-      expect(screen.getByText("Legs + Core")).toBeInTheDocument();
-      expect(screen.getByText("Stable lower body and core")).toBeInTheDocument();
-    });
-
-    it("renders Upper plan when no workout logged on Saturday", () => {
-      renderPanel("2026-09-05");
-
-      expect(screen.getByText("Upper")).toBeInTheDocument();
-      expect(screen.getByText("Upper body plus skill practice")).toBeInTheDocument();
-    });
-
-    it("renders Lower plan when no workout logged on Sunday", () => {
-      renderPanel("2026-09-06");
-
-      expect(screen.getByText("Lower")).toBeInTheDocument();
-      expect(screen.getByText("Lower body strength and controlled movement")).toBeInTheDocument();
-    });
-
-    it("renders the complete planned workout template instead of the weekday template", () => {
-      const plannedUpperWorkout: Workout = {
-        ...completedWorkout,
-        id: 2,
-        workoutType: "UPPER",
-        status: "PLANNED",
-        notes: null,
-        exercises: [],
-      };
-
-      renderPanel("2026-09-01", [plannedUpperWorkout], {
-        ...getPlannedWorkout("2026-09-05"),
-        date: "2026-09-01",
-        dayOfWeek: "TUESDAY",
-      });
-
-      expect(screen.getByRole("heading", { name: "Upper" })).toBeInTheDocument();
-      expect(screen.getByText("Upper body plus skill practice")).toBeInTheDocument();
-      expect(screen.getByText("Light row and press ramp-up sets")).toBeInTheDocument();
-      expect(screen.getByText("Seated Cable Row")).toBeInTheDocument();
-      expect(screen.getByText("Keep skill reps crisp.")).toBeInTheDocument();
-      expect(screen.queryByText("Chest, shoulders, triceps")).not.toBeInTheDocument();
-    });
+    expect(screen.getByText("Monday's Plan")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Upper A" })).toBeInTheDocument();
+    expect(screen.getByText("Chest-Supported Row")).toBeInTheDocument();
+    expect(screen.getAllByText("3 sets").length).toBeGreaterThanOrEqual(1);
+    expect(screen.getByText("Generally keep 1-3 reps in reserve on working sets.")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Log Workout" })).toHaveAttribute("href", "/workouts/");
   });
 
-  describe("rest day display", () => {
-    it("renders rest day for Friday with recovery messaging", () => {
-      renderPanel("2026-09-04");
+  it("renders exact set ranges without requiring rep targets", () => {
+    renderPanel("2026-09-01");
 
-      expect(screen.getByRole("heading", { name: "Rest" })).toBeInTheDocument();
-      expect(screen.getByText("Recovery / sleep protection")).toBeInTheDocument();
-      expect(screen.getByText("This is a recovery day, not a missed lifting slot.")).toBeInTheDocument();
-      expect(screen.getByText("Optional")).toBeInTheDocument();
-      expect(screen.getByText("Easy walk after work")).toBeInTheDocument();
-    });
-
-    it("renders rest day for Monday with recovery messaging", () => {
-      renderPanel("2026-09-07");
-
-      expect(screen.getByRole("heading", { name: "Rest" })).toBeInTheDocument();
-      expect(screen.getByText("Recovery day")).toBeInTheDocument();
-      expect(screen.getByText("This is an intentional rest day.")).toBeInTheDocument();
-    });
-
-    it("does not label rest day as missed", () => {
-      renderPanel("2026-09-04");
-
-      expect(screen.queryByText("Missed")).not.toBeInTheDocument();
-      expect(screen.queryByText("This is a missed session")).not.toBeInTheDocument();
-    });
-
-    it("labels a future rest plan with its weekday", () => {
-      renderPanel("2026-09-04");
-
-      expect(screen.getByText("Friday's Plan")).toBeInTheDocument();
-    });
+    expect(screen.getByText("Supported Split Squat")).toBeInTheDocument();
+    expect(screen.getAllByText("2-3 sets").length).toBeGreaterThanOrEqual(1);
   });
 
-  describe("exercise cards", () => {
-    it("renders each exercise as an individual card", () => {
-      renderPanel("2026-09-01");
+  it("renders Lower B substitutions, back guidance, and optional cardio", () => {
+    renderPanel("2026-09-06");
 
-      expect(screen.getByText("Machine Chest Press")).toBeInTheDocument();
-      expect(screen.getByText("Incline Dumbbell Press")).toBeInTheDocument();
-      expect(screen.getByText("Seated Machine Shoulder Press")).toBeInTheDocument();
-      expect(screen.getByText("Cable or Machine Lateral Raise")).toBeInTheDocument();
-      expect(screen.getByText("Rope Pressdown")).toBeInTheDocument();
-    });
-
-    it("displays sets, reps, RIR, and rest for each exercise", () => {
-      renderPanel("2026-09-01");
-
-      expect(screen.getByText("2 × 6–10")).toBeInTheDocument();
-      expect(screen.getAllByText("RIR 3–4").length).toBeGreaterThanOrEqual(1);
-      expect(screen.getAllByText("Rest: 2 min").length).toBeGreaterThanOrEqual(1);
-    });
-
-    it("displays exercise notes when available", () => {
-      renderPanel("2026-09-02");
-
-      expect(screen.getByText("Lat Pulldown")).toBeInTheDocument();
-      expect(screen.getByText("Pause near chest. Avoid turning it into a lean-back pull.")).toBeInTheDocument();
-    });
+    expect(screen.getByText(/Romanian Deadlift is optional/)).toBeInTheDocument();
+    expect(screen.getByText("Do not use Romanian Deadlifts when back discomfort is present.")).toBeInTheDocument();
+    expect(screen.getByText("Optional")).toBeInTheDocument();
+    expect(screen.getByText("10-20 minutes easy cardio")).toBeInTheDocument();
   });
 
-  describe("warm-up and guardrails", () => {
-    it("displays warm-up section", () => {
-      renderPanel("2026-09-01");
+  it.each([
+    ["2026-09-02", "Onsite workday", "Tomorrow's Plan"],
+    ["2026-09-03", "Recovery day", "Thursday's Plan"],
+    ["2026-09-04", "Onsite workday", "Friday's Plan"],
+  ])("renders %s as an intentional rest day", (date, subtitle, eyebrow) => {
+    renderPanel(date);
 
-      expect(screen.getByText("Warm-up")).toBeInTheDocument();
-      expect(screen.getByText("5 min easy treadmill or bike")).toBeInTheDocument();
-    });
-
-    it("displays guardrails section", () => {
-      renderPanel("2026-09-01");
-
-      expect(screen.getByText("Guardrails")).toBeInTheDocument();
-      expect(screen.getByText("First ramp week stays at 2 work sets.")).toBeInTheDocument();
-    });
+    expect(screen.getByRole("heading", { name: "Rest" })).toBeInTheDocument();
+    expect(screen.getByText(subtitle)).toBeInTheDocument();
+    expect(screen.getByText(eyebrow)).toBeInTheDocument();
+    expect(screen.getByText("This is an intentional rest day.")).toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: "Log Workout" })).not.toBeInTheDocument();
   });
 
-  describe("no persistence side effects", () => {
-    it("does not create workout records when displaying plan", () => {
-      const { container } = renderPanel("2026-09-01");
+  it("links an existing planned workout to editing", () => {
+    const plannedUpperWorkout: Workout = {
+      ...completedWorkout,
+      id: 2,
+      workoutType: "UPPER_B",
+      status: "PLANNED",
+      notes: null,
+    };
 
-      expect(screen.getByText("Today's Plan")).toBeInTheDocument();
-      expect(container.querySelector("[data-workout-id]")).not.toBeInTheDocument();
+    renderPanel("2026-09-01", [plannedUpperWorkout], {
+      ...getPlannedWorkout("2026-09-05"),
+      date: "2026-09-01",
+      dayOfWeek: "TUESDAY",
     });
+
+    expect(screen.getAllByRole("heading", { name: "Upper B" })).toHaveLength(2);
+    expect(screen.getByRole("link", { name: "Edit Workout" })).toHaveAttribute("href", "/workouts/2");
+    expect(screen.queryByRole("link", { name: "Log Workout" })).not.toBeInTheDocument();
   });
 
-  describe("UTC/timezone safety", () => {
-    it("does not shift weekday due to UTC conversion", () => {
-      // 2026-09-01 is a Tuesday in local time
-      // Using parseLocalDate ensures no timezone shift
-      const plan = getPlannedWorkout("2026-09-01");
-      expect(plan.title).toBe("Push");
-
-      // 2026-09-07 is a Monday in local time
-      const mondayPlan = getPlannedWorkout("2026-09-07");
-      expect(mondayPlan.title).toBe("Rest");
-      expect(mondayPlan.type).toBe("rest");
-    });
-  });
 });
